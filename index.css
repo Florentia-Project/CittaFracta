@@ -1,0 +1,70 @@
+/* src/index.css */
+
+/*
+ * Global Layout Configuration
+ * ---------------------------
+ * Ensures the React root container occupies the full viewport
+ * to support full-screen map rendering without default margins.
+ */
+body, html, #root {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/*
+ * Map Layer Styles: Districts (Sesti/Quartieri)
+ * ---------------------------------------------
+ * Custom styling for Leaflet polygons to create interactive
+ * visual feedback (glow effects) on the historical map layers.
+ */
+
+/* Base State: Subtle ambient glow to distinguish boundaries */
+.district-glow {
+  filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.5));
+  transition: all 0.3s ease-in-out; /* Smooth transition for hover states */
+}
+
+/* Interaction State: High visibility highlight */
+/* Utilizing .leaflet-interactive to ensure specificity over default Leaflet styles */
+.leaflet-interactive.district-glow:hover {
+  filter: drop-shadow(0 0 8px rgba(255, 215, 0, 1.0)); /* Gold Halo Effect */
+  stroke: #ffffff;
+  stroke-width: 4px;
+  cursor: pointer;
+}
+
+/* --- Fix: Remove black border on selected map elements --- */
+.leaflet-interactive:focus {
+    outline: none !important;
+}
+
+path.leaflet-interactive:focus {
+    outline: none !important;
+}
+
+.leaflet-container :focus {
+    outline: none !important;
+}
+
+/* --- FIX MAP FLICKERING --- */
+
+/* 1. מבטל אנימציות על שינוי צורה (path data) כדי למנוע קפיצות בזום */
+.leaflet-zoom-anim .leaflet-zoom-animated {
+    transition: transform 0.25s cubic-bezier(0,0,0.25,1);
+}
+
+/* 2. זה החלק הקריטי: אנחנו אומרים לדפדפן לא לעשות אנימציה על "הגיאומטריה" של הפוליגון */
+path.district-glow {
+    /* מאפשר אנימציה רק על הצבע והשקיפות */
+    transition: fill-opacity 0.2s ease, fill 0.2s ease, stroke 0.2s ease !important;
+    /* מוודא שאין אנימציה על המיקום/צורה */
+    transform-origin: center;
+}
+
+/* 3. הגנה נוספת: בזמן זום, מבטל הכל */
+.leaflet-zoom-anim path {
+    transition: none !important;
+}

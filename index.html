@@ -1,0 +1,62 @@
+
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Florentine Factions Research Tool</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500&family=MedievalSharp&display=swap" rel="stylesheet">
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Inter', 'sans-serif'],
+              serif: ['Cormorant Garamond', 'serif'],
+              display: ['Cinzel', 'serif'],
+              medieval: ['MedievalSharp', 'cursive'],
+            },
+            colors: {
+              // Exact matches from reference style (Languages map & Timeline)
+              'parchment': '#F3EDE2', // The main background beige
+              'parchment-dark': '#E6DCCF', // Slightly darker for headers/cards
+              'ink': '#332D28', // The primary dark text color (Charcoal brown)
+              'ink-light': '#6B665F', // Muted text
+              'earth-brown': '#8B5E3C', // Timeline accents
+              'earth-orange': '#C17C59', // Accent for highlights
+              'earth-green': '#7D8471', // Muted green accent
+            }
+          }
+        }
+      }
+    </script>
+  <script type="importmap">
+{
+  "imports": {
+    "lucide-react": "https://esm.sh/lucide-react@^0.562.0",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "react/": "https://esm.sh/react@^19.2.3/",
+    "react": "https://esm.sh/react@^19.2.3"
+  }
+}
+</script>
+<style>
+  html, body, #root {
+    height: 100%;
+    margin: 0;
+    overflow: hidden; 
+  }
+  /* Grainy texture overlay to simulate paper */
+  .paper-texture {
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
+    pointer-events: none;
+  }
+</style>
+<link rel="stylesheet" href="/index.css">
+</head>
+  <body class="bg-parchment text-ink h-full">
+    <div id="root" class="h-full"></div>
+  <script type="module" src="/index.tsx"></script>
+</body>
+</html>

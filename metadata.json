@@ -1,0 +1,5 @@
+{
+  "name": "Florentine Factions: Historical Research Tool",
+  "description": "A Power BI-style historical analysis tool separating dataset management from real-time historical visualization of Florentine families (1215-1450).",
+  "requestFramePermissions": []
+}
