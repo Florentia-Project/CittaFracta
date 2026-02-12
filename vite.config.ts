@@ -8,7 +8,7 @@ export default defineConfig({
     host: '0.0.0.0',
   },
   plugins: [react()],
-  base: '/CittaFracta/', 
+  base: '/Florentia-Fracta/',
   resolve: {
     alias: {
       '@': path.resolve(__dirname, '.'),
