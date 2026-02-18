@@ -1,5 +1,5 @@
 import Papa from 'papaparse';
-import { Family, Relationship } from '../src/types';
+import { Family, Relationship } from '../types';
 
 const URLS = {
     FAMILIES: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQkeOA_WfDgVys6FiH5AEw3z_auuZ_Mgrbbx781FkZo-1Iix_c6-Y-I-ls_IRyutjD4BCLPhqqk_Ihg/pub?gid=1270711877&single=true&output=csv',
@@ -84,6 +84,7 @@ export const fetchFamiliesFromSheet = async (): Promise<Family[]> => {
                 } : undefined,
                 yearStart: getInt(row['yearstart']), 
                 yearEnd: getInt(row['yearend']),
+                coatOfArmsUrl: row['imageurl'],
                 originalFaction: timeline['1216_faction'] || 'Guelf',
                 relationships: relationships
             } as Family;

@@ -1,132 +1,44 @@
 // src/App.tsx
-import React, { useState, useEffect } from 'react';
-import { INITIAL_DATASET, INITIAL_YEAR, MAX_YEAR, EVENTS, SESTI_LIST } from './constants';
+import React, { useState } from 'react';
+import { SESTI_LIST } from './constants';
 import { Family, HistoricalEvent } from './types';
 import HistoricalMap from './features/social-map/HistoricalMap';
 import GeographicalMap from './features/geo-map/GeographicalMap';
 import ChronicleModal from './features/chronicle/components/ChronicleModal';
 import { calculateFamilyState } from './features/social-map/logic/engine';
-import { Map as MapIcon, Play, Pause, ChevronRight, ChevronLeft, X, MapPin, Edit3, Save, BookOpen, Plus, Check, Users } from 'lucide-react';
-
-// --- Imports for Google Sheets & Utils ---
-import { fetchFamiliesFromSheet } from './services/sheetService';
+import { Play, Pause, ChevronRight, ChevronLeft, X, MapPin, Edit3, Save, BookOpen, Plus, Check, Users, Keyboard } from 'lucide-react';
 import { getFamilyDistrict } from './utils/districtUtils'; 
 
+// --- Custom Hooks ---
+import { useTimeline } from './hooks/useTimeline';
+import { useHistoricalData } from './hooks/useHistoricalData';
+
 const App: React.FC = () => {
-  // --- State Initialization ---
-  
-  // Initialize data from local storage if available, otherwise use constants
-  const [data, setData] = useState<Family[]>(() => {
-    try {
-      const savedData = localStorage.getItem('florentine_factions_data_v3');
-      return savedData ? JSON.parse(savedData) : INITIAL_DATASET;
-    } catch (error) {
-      console.error('Failed to load data from local storage:', error);
-      return INITIAL_DATASET;
-    }
-  });
+  // --- 1. Historical Data Hook ---
+  const { data, setData, events, setEvents, isLoading } = useHistoricalData();
 
-  // Events State
-  const [events, setEvents] = useState<HistoricalEvent[]>(() => {
-      try {
-          const savedEvents = localStorage.getItem('florentine_factions_events_v2');
-          return savedEvents ? JSON.parse(savedEvents) : EVENTS;
-      } catch (error) {
-          return EVENTS;
-      }
-  });
-
-  const [currentYear, setCurrentYear] = useState<number>(INITIAL_YEAR);
-  // שינינו את ברירת המחדל ל-'map' כי מחקנו את 'data'
+  // --- 2. Local UI State ---
   const [activeTab, setActiveTab] = useState<'map' | 'city'>('map'); 
-  const [isPlaying, setIsPlaying] = useState(false);
   const [selectedFamily, setSelectedFamily] = useState<Family | null>(null);
   
-  // EDIT MODE STATE (Map & Family)
+  // Edit Mode State 
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState<Partial<Family>>({});
 
-  // CHRONICLE SYSTEM STATE
+  // Chronicle System State
   const [isChronicleOpen, setIsChronicleOpen] = useState(false);
   const [isEditingEvent, setIsEditingEvent] = useState(false);
   const [eventForm, setEventForm] = useState<Partial<HistoricalEvent>>({});
 
-  // Loading State for Sheets
-  const [isLoading, setIsLoading] = useState(true);
-
-  // --- Effects ---
-
-  // 1. Load Data from Google Sheets on Start
-  useEffect(() => {
-    const initData = async () => {
-      try {
-        console.log("🔄 Starting data sync from Google Sheets...");
-        const freshData = await fetchFamiliesFromSheet();
-        
-        if (freshData && freshData.length > 0) {
-          console.log(`✅ Data synced successfully! Loaded ${freshData.length} families.`);
-          setData(freshData); // Update app state
-          
-          localStorage.removeItem('florentine_factions_data_v3');
-          // Update local storage so next load is faster
-          localStorage.setItem('florentine_factions_data_v3', JSON.stringify(freshData));
-        } else {
-           console.warn("⚠️ Sheet returned empty data. Keeping existing data.");
-        }
-      } catch (error) {
-        console.error("❌ Failed to sync with Sheets:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    initData();
-  }, []);
-
-  // 2. Persist data changes to local storage
-  useEffect(() => {
-    localStorage.setItem('florentine_factions_data_v3', JSON.stringify(data));
-  }, [data]);
-
-  // 3. Persist events changes
-  useEffect(() => {
-      localStorage.setItem('florentine_factions_events_v2', JSON.stringify(events));
-  }, [events]);
-
-  // 4. Playback logic
-  React.useEffect(() => {
-    let interval: ReturnType<typeof setInterval>;
-    if (isPlaying) {
-      interval = setInterval(() => {
-        setCurrentYear((prev) => {
-          if (prev >= MAX_YEAR) {
-            setIsPlaying(false);
-            return prev;
-          }
-          return prev + 1;
-        });
-      }, 500); // 0.5s per year
-    }
-    return () => clearInterval(interval);
-  }, [isPlaying]);
-
-  // --- Handlers & Helpers ---
-
+  // --- 3. Timeline Hook ---
+  // Enable keyboard shortcuts ONLY when viewing the political map
+  const isKeyboardEnabled = activeTab === 'map';
+  const { currentYear, setCurrentYear, isPlaying, setIsPlaying, jumpToEvent } = useTimeline(events, isKeyboardEnabled);
+  
+  // --- 4. Handlers & Helpers ---
   const activeEvent = events.find(e => e.year === currentYear);
 
-  const jumpToEvent = (direction: 'next' | 'prev') => {
-    const sortedEvents = [...events].sort((a, b) => a.year - b.year);
-    if (direction === 'next') {
-        const next = sortedEvents.find(e => e.year > currentYear);
-        if (next) setCurrentYear(next.year);
-    } else {
-        const prev = [...sortedEvents].reverse().find(e => e.year < currentYear);
-        if (prev) setCurrentYear(prev.year);
-    }
-  };
-
   const handleSelectFamily = (family: Family | null) => {
-      // If we select a different family while editing, cancel edit
       if (isEditing) {
           if (confirm("You have unsaved changes. Discard them?")) {
               setIsEditing(false);
@@ -166,8 +78,7 @@ const App: React.FC = () => {
       }));
   };
 
-  // --- EVENT EDITING LOGIC ---
-
+  // --- Event Editing Logic ---
   const startEventEdit = () => {
       if (activeEvent) {
           setEventForm({ ...activeEvent });
@@ -184,7 +95,7 @@ const App: React.FC = () => {
   };
 
   const saveEventEdit = () => {
-      if (!eventForm.title) return; // Basic validation
+      if (!eventForm.title) return; 
       
       const newEvent = { 
           ...eventForm, 
@@ -196,7 +107,6 @@ const App: React.FC = () => {
                 : [])
       } as HistoricalEvent;
 
-      // Check if updating existing or adding new
       const exists = events.some(e => e.year === currentYear);
       let newEvents;
       if (exists) {
@@ -212,7 +122,11 @@ const App: React.FC = () => {
 
   const currentState = selectedFamily ? calculateFamilyState(selectedFamily, currentYear) : null;
 
-  // --- RENDER ---
+  if (isLoading) {
+    return <div className="h-screen flex items-center justify-center bg-parchment text-ink font-display text-2xl">Loading Historical Records...</div>;
+  }
+
+  // --- 5. RENDER ---
   return (
     <div className="h-screen bg-parchment flex flex-col font-sans overflow-hidden text-ink relative selection:bg-earth-orange/20">
       <div className="absolute inset-0 paper-texture z-50 pointer-events-none"></div>
@@ -224,8 +138,6 @@ const App: React.FC = () => {
           <p className="text-[10px] font-serif italic text-ink-light mt-0.5 tracking-wider">Historical Analysis (1215-1450)</p>
         </div>
         <div className="flex gap-6 text-[10px] font-sans font-bold tracking-widest uppercase mb-2">
-          {/* מחקנו את כפתור ה-Data מכאן */}
-          
           <button
             onClick={() => setActiveTab('map')}
             className={`flex items-center gap-2 transition-all pb-1 border-b ${activeTab === 'map' ? 'border-earth-orange text-earth-orange' : 'border-transparent text-ink-light hover:text-ink'}`}
@@ -244,10 +156,7 @@ const App: React.FC = () => {
       {/* Main Content */}
       <main className="flex-1 flex flex-col min-h-0 relative z-0">
         
-        {/* View Content */}
         <div className="flex-1 flex flex-col relative overflow-hidden flex-row">
-           
-           {/* מחקנו את הבלוק של activeTab === 'data' מכאן */}
            
            {activeTab === 'city' && (
               <div className="h-full w-full relative z-10">
@@ -258,7 +167,6 @@ const App: React.FC = () => {
                     isEditing={isEditing}
                     onCoordinatesChange={handleMapClick}
                     tempFamily={editForm}
-                    // שים לב: אנחנו צריכים להעביר כאן את השנה כדי שהמפה תדע לצייר מחוזות נכון
                     year={currentYear}
                     onYearChange={setCurrentYear} 
                  />
@@ -267,7 +175,6 @@ const App: React.FC = () => {
 
            {activeTab === 'map' && (
              <div className="flex-1 relative h-full flex">
-                {/* Map Container */}
                 <div className="flex-1 relative h-full">
                     <HistoricalMap 
                         data={data} 
@@ -277,7 +184,6 @@ const App: React.FC = () => {
                     />
                 </div>
 
-                {/* Right Sidebar for Controls - נשאר בדיוק כמו בקוד המקורי שלך */}
                 <div className="w-48 border-l border-ink/10 bg-parchment p-6 flex flex-col items-end shrink-0 z-20 relative shadow-sm">
                      <div className="pointer-events-none mb-6 text-right">
                          <span className="block text-[10px] font-sans uppercase tracking-[0.2em] text-ink-light mb-1">Anno Domini</span>
@@ -292,10 +198,7 @@ const App: React.FC = () => {
                         <span className="text-[10px] uppercase tracking-widest font-bold">{isPlaying ? 'Pause' : 'Play'}</span>
                     </button>
                      
-                     {/* --- CHRONICLE WIDGET (Event System) --- */}
                      <div className="w-full text-right border-t border-ink/20 pt-4 animate-fade-in relative group/widget">
-                         
-                         {/* Edit Trigger */}
                          {!isEditingEvent && (
                              <button 
                                 onClick={startEventEdit}
@@ -309,7 +212,6 @@ const App: React.FC = () => {
                          <span className="text-[9px] font-bold text-earth-orange uppercase tracking-wider block mb-2">Chronicle</span>
                          
                          {isEditingEvent ? (
-                             // --- EDIT MODE ---
                              <div className="flex flex-col gap-2 text-right">
                                  <span className="text-[9px] font-bold text-ink-light uppercase tracking-widest mb-1">
                                     Editing Entry ({currentYear})
@@ -339,7 +241,6 @@ const App: React.FC = () => {
                                  </div>
                              </div>
                          ) : (
-                             // --- VIEW MODE ---
                              activeEvent ? (
                                 <>
                                     <h3 className="text-lg font-display font-bold text-ink leading-tight mb-2">{activeEvent.title}</h3>
@@ -363,43 +264,54 @@ const App: React.FC = () => {
                              )
                          )}
                      </div>
+                    <div className="mt-auto w-full pt-6 border-t border-ink/10 text-right opacity-40 hover:opacity-100 transition-opacity duration-300">
+                         <div className="flex items-center justify-end gap-1.5 mb-3 text-ink-light">
+                             <span className="text-[9px] uppercase font-bold tracking-widest">Controls</span>
+                             <Keyboard size={12} />
+                         </div>
+                         
+                         <div className="flex flex-col gap-2.5">
+                             <div className="flex items-center justify-end gap-2">
+                                 <span className="text-[10px] font-serif text-ink italic">Play / Pause</span>
+                                 <kbd className="px-1.5 py-0.5 bg-ink/5 border border-ink/10 rounded text-[9px] font-sans text-ink font-bold shadow-sm">Space</kbd>
+                             </div>
+                             <div className="flex items-center justify-end gap-2">
+                                 <span className="text-[10px] font-serif text-ink italic">Change Year</span>
+                                 <div className="flex gap-0.5">
+                                     <kbd className="px-1.5 py-0.5 bg-ink/5 border border-ink/10 rounded text-[9px] font-sans text-ink font-bold shadow-sm">←</kbd>
+                                     <kbd className="px-1.5 py-0.5 bg-ink/5 border border-ink/10 rounded text-[9px] font-sans text-ink font-bold shadow-sm">→</kbd>
+                                 </div>
+                             </div>
+                             <div className="flex items-center justify-end gap-2">
+                                 <span className="text-[10px] font-serif text-ink italic">Jump to Event</span>
+                                 <div className="flex items-center gap-1">
+                                     <kbd className="px-1.5 py-0.5 bg-ink/5 border border-ink/10 rounded text-[9px] font-sans text-ink font-bold shadow-sm">Shift</kbd>
+                                     <span className="text-[8px] text-ink-light">+</span>
+                                     <kbd className="px-1.5 py-0.5 bg-ink/5 border border-ink/10 rounded text-[9px] font-sans text-ink font-bold shadow-sm">← / →</kbd>
+                                 </div>
+                             </div>
+                         </div>
+                     </div>
                 </div>
             </div>
            )}
            
-           {/* Side Detail Panel - נשאר בדיוק אותו הדבר */}
-           <div 
-                className={`absolute top-0 right-0 bottom-0 w-80 bg-parchment border-l border-ink/20 shadow-[-5px_0_15px_-5px_rgba(0,0,0,0.1)] transition-transform duration-300 transform z-40 ${selectedFamily ? 'translate-x-0' : 'translate-x-full'}`}
-            >
+           <div className={`absolute top-0 right-0 bottom-0 w-80 bg-parchment border-l border-ink/20 shadow-[-5px_0_15px_-5px_rgba(0,0,0,0.1)] transition-transform duration-300 transform z-40 ${selectedFamily ? 'translate-x-0' : 'translate-x-full'}`}>
                 {selectedFamily && currentState && (
                     <div className="h-full flex flex-col p-6 overflow-y-auto">
-                        
-                        {/* Title Bar with Edit Action */}
                         <div className="flex justify-between items-start mb-6">
                             <h2 className="text-xl font-display font-bold text-ink">{selectedFamily.name}</h2>
                             <div className="flex gap-2">
                                 {!isEditing ? (
-                                    <button 
-                                        onClick={startEdit} 
-                                        className="text-ink-light hover:text-earth-orange p-1 rounded hover:bg-ink/5"
-                                        title="Edit Location & Details"
-                                    >
+                                    <button onClick={startEdit} className="text-ink-light hover:text-earth-orange p-1 rounded hover:bg-ink/5" title="Edit Location & Details">
                                         <Edit3 size={16} />
                                     </button>
                                 ) : (
                                     <div className="flex gap-2">
-                                        <button 
-                                            onClick={saveEdit} 
-                                            className="text-green-700 hover:text-green-900 bg-green-100 p-1 rounded"
-                                            title="Save Changes"
-                                        >
+                                        <button onClick={saveEdit} className="text-green-700 hover:text-green-900 bg-green-100 p-1 rounded" title="Save Changes">
                                             <Save size={16} />
                                         </button>
-                                        <button 
-                                            onClick={cancelEdit} 
-                                            className="text-red-700 hover:text-red-900 bg-red-100 p-1 rounded"
-                                            title="Cancel"
-                                        >
+                                        <button onClick={cancelEdit} className="text-red-700 hover:text-red-900 bg-red-100 p-1 rounded" title="Cancel">
                                             <X size={16} />
                                         </button>
                                     </div>
@@ -412,12 +324,7 @@ const App: React.FC = () => {
 
                         {selectedFamily.coatOfArmsUrl && (
                             <div className="w-full h-32 mb-6 p-4 border border-ink/10 bg-parchment-dark/10 rounded flex items-center justify-center">
-                                <img 
-                                    src={selectedFamily.coatOfArmsUrl} 
-                                    alt={`${selectedFamily.name} Coat of Arms`} 
-                                    referrerPolicy="no-referrer"
-                                    className="h-full object-contain mix-blend-multiply" 
-                                />
+                                <img src={selectedFamily.coatOfArmsUrl} alt={`${selectedFamily.name} Coat of Arms`} referrerPolicy="no-referrer" className="h-full object-contain mix-blend-multiply" />
                             </div>
                         )}
 
@@ -436,48 +343,31 @@ const App: React.FC = () => {
 
                             <div className="border-t border-ink/10 pt-4">
                                 <h3 className="text-[10px] font-sans font-bold uppercase tracking-widest text-ink-light mb-2">Origins & Locations</h3>
-                                
                                 <div className="grid grid-cols-1 gap-3 text-sm font-serif">
                                     {isEditing ? (
-                                        // --- EDIT FORM FOR LOCATION ---
                                         <div className="bg-ink/5 p-3 rounded border border-ink/10 space-y-3">
                                             <div>
                                                 <label className="block text-[10px] uppercase font-bold text-ink-light mb-1">Sesto (District)</label>
-                                                <select 
-                                                    value={editForm.sesto || ''}
-                                                    onChange={(e) => setEditForm(prev => ({ ...prev, sesto: e.target.value }))}
-                                                    className="w-full bg-parchment border border-ink/20 rounded px-2 py-1 text-sm font-serif focus:outline-none focus:border-earth-orange"
-                                                >
+                                                <select value={editForm.sesto || ''} onChange={(e) => setEditForm(prev => ({ ...prev, sesto: e.target.value }))} className="w-full bg-parchment border border-ink/20 rounded px-2 py-1 text-sm font-serif focus:outline-none focus:border-earth-orange">
                                                     <option value="">Unknown Location</option>
-                                                    {SESTI_LIST.map(s => (
-                                                        <option key={s} value={s}>{s}</option>
-                                                    ))}
+                                                    {SESTI_LIST.map(s => <option key={s} value={s}>{s}</option>)}
                                                 </select>
                                             </div>
                                             <div>
                                                 <label className="block text-[10px] uppercase font-bold text-ink-light mb-1">Coordinates</label>
                                                 {editForm.coordinates ? (
                                                     <div className="flex items-center gap-2">
-                                                        <span className="text-xs font-mono text-ink bg-parchment px-2 py-1 rounded border border-ink/10">
-                                                            {editForm.coordinates.x.toFixed(1)}%, {editForm.coordinates.y.toFixed(1)}%
-                                                        </span>
+                                                        <span className="text-xs font-mono text-ink bg-parchment px-2 py-1 rounded border border-ink/10">{editForm.coordinates.x.toFixed(1)}%, {editForm.coordinates.y.toFixed(1)}%</span>
                                                         <span className="text-[10px] text-earth-orange italic">Pin Placed</span>
                                                     </div>
-                                                ) : (
-                                                    <span className="text-xs text-ink-light italic">Click map to set pin...</span>
-                                                )}
+                                                ) : <span className="text-xs text-ink-light italic">Click map to set pin...</span>}
                                             </div>
                                         </div>
                                     ) : (
-                                        // --- READ ONLY VIEW ---
                                         <div className="grid grid-cols-2 gap-2">
                                             <div>
-                                                <span className="block text-ink-light text-xs italic">
-                                                    District ({currentYear < 1343 ? 'Sesto' : 'Quartiere'})
-                                                </span>
-                                                <span className="text-ink">
-                                                    {getFamilyDistrict(selectedFamily, currentYear)}
-                                                </span>
+                                                <span className="block text-ink-light text-xs italic">District ({currentYear < 1343 ? 'Sesto' : 'Quartiere'})</span>
+                                                <span className="text-ink">{getFamilyDistrict(selectedFamily, currentYear)}</span>
                                             </div>
                                             <div>
                                                 <span className="block text-ink-light text-xs italic">Coordinates</span>
@@ -506,17 +396,13 @@ const App: React.FC = () => {
                             {(selectedFamily.occupation || selectedFamily.propertyType) && (
                                 <div className="border-t border-ink/10 pt-4">
                                     <h3 className="text-[10px] font-sans font-bold uppercase tracking-widest text-ink-light mb-1">Economy</h3>
-                                    {selectedFamily.occupation && (
-                                        <p className="text-sm font-serif text-ink mb-1"><span className="italic text-ink-light">Occupation:</span> {selectedFamily.occupation}</p>
-                                    )}
-                                    {selectedFamily.propertyType && (
-                                            <p className="text-sm font-serif text-ink"><span className="italic text-ink-light">Property:</span> {selectedFamily.propertyType}</p>
-                                    )}
+                                    {selectedFamily.occupation && <p className="text-sm font-serif text-ink mb-1"><span className="italic text-ink-light">Occupation:</span> {selectedFamily.occupation}</p>}
+                                    {selectedFamily.propertyType && <p className="text-sm font-serif text-ink"><span className="italic text-ink-light">Property:</span> {selectedFamily.propertyType}</p>}
                                 </div>
                             )}
 
                             {(selectedFamily.originalSourceTerm || selectedFamily.sourceCitation) && (
-                                    <div className="border-t border-ink/10 pt-4">
+                                <div className="border-t border-ink/10 pt-4">
                                     <h3 className="text-[10px] font-sans font-bold uppercase tracking-widest text-ink-light mb-1">Sources</h3>
                                     <p className="text-xs font-serif text-ink-light italic">{selectedFamily.originalSourceTerm}</p>
                                     {selectedFamily.sourceCitation && <p className="text-[10px] text-ink-light mt-1">Ref: {selectedFamily.sourceCitation}</p>}
@@ -528,28 +414,20 @@ const App: React.FC = () => {
             </div>
         </div>
 
-        {/* Timeline Footer (Only for Visualization) - נשאר בדיוק אותו הדבר */}
         {activeTab === 'map' && (
             <div className="bg-parchment pb-6 pt-2 px-12 shrink-0 z-30 relative">
                 <div className="max-w-6xl mx-auto w-full relative flex items-center gap-8">
-                    
-                    {/* The Timeline Line */}
                     <div className="relative h-12 flex items-center flex-1">
                         <div className="absolute w-full h-[1px] bg-ink/30"></div>
-                        
-                        {/* Event Markers */}
-                        {events.map((event) => {
-                             const position = ((event.year - INITIAL_YEAR) / (MAX_YEAR - INITIAL_YEAR)) * 100;
+                        {events
+                            .filter((event) => event.year <= 1302) /* מסנן אירועים עתידיים כדי שלא יופיעו על הקו */
+                            .map((event) => {
+                             const position = ((event.year - 1215) / (1302 - 1215)) * 100; /* שינינו מ-1450 ל-1302 */
                              const isPast = currentYear >= event.year;
                              const isCurrent = currentYear === event.year;
                              
                              return (
-                                 <div 
-                                     key={event.year}
-                                     className="absolute transform -translate-x-1/2 flex flex-col items-center group cursor-pointer"
-                                     style={{ left: `${position}%` }}
-                                     onClick={() => setCurrentYear(event.year)}
-                                  >
+                                 <div key={event.year} className="absolute transform -translate-x-1/2 flex flex-col items-center group cursor-pointer" style={{ left: `${position}%` }} onClick={() => setCurrentYear(event.year)}>
                                      <div className={`w-2.5 h-2.5 rotate-45 border transition-all duration-300 z-10 ${isPast ? 'bg-ink border-ink' : 'bg-parchment border-ink/40 group-hover:border-ink'}`} />
                                      <span className={`absolute top-5 text-[9px] font-bold font-sans text-ink uppercase tracking-wider transition-opacity duration-300 whitespace-nowrap ${isCurrent ? 'opacity-100' : 'opacity-40 group-hover:opacity-100'}`}>
                                          {event.year}
@@ -557,26 +435,11 @@ const App: React.FC = () => {
                                   </div>
                              )
                         })}
-
-                        {/* Thumb */}
-                         <div 
-                            className="absolute w-4 h-4 bg-parchment border-[2px] border-earth-orange rounded-full shadow-sm pointer-events-none z-20 transform -translate-x-1/2 transition-all duration-300 ease-out flex items-center justify-center"
-                            style={{ left: `${((currentYear - INITIAL_YEAR) / (MAX_YEAR - INITIAL_YEAR)) * 100}%` }}
-                        >
+                         <div className="absolute w-4 h-4 bg-parchment border-[2px] border-earth-orange rounded-full shadow-sm pointer-events-none z-20 transform -translate-x-1/2 transition-all duration-300 ease-out flex items-center justify-center" style={{ left: `${((currentYear - 1215) / (1302 - 1215)) * 100}%` }}> {/* שינינו מ-1450 ל-1302 */}
                             <div className="w-1.5 h-1.5 bg-earth-orange rounded-full"></div>
                         </div>
-
-                        <input 
-                            type="range" 
-                            min={INITIAL_YEAR} 
-                            max={MAX_YEAR} 
-                            value={currentYear}
-                            onChange={(e) => setCurrentYear(Number(e.target.value))}
-                            className="w-full h-12 opacity-0 cursor-pointer absolute z-30"
-                        />
+                        <input type="range" min={1215} max={1302} value={currentYear} onChange={(e) => setCurrentYear(Number(e.target.value))} className="w-full h-12 opacity-0 cursor-pointer absolute z-30" /> {/* המקסימום של הסליידר שונה ל-1302 */}
                     </div>
-                    
-                    {/* Navigation Buttons */}
                     <div className="flex items-center gap-2 shrink-0">
                         <button onClick={() => jumpToEvent('prev')} className="text-ink-light hover:text-ink flex items-center justify-center w-8 h-8 rounded-full border border-ink/20 hover:bg-ink/5 transition-colors group" title="Previous Event">
                            <ChevronLeft size={14} className="group-hover:-translate-x-0.5 transition-transform" /> 
@@ -590,14 +453,7 @@ const App: React.FC = () => {
         )}
       </main>
 
-      {/* CHRONICLE MODAL (The Big Window) - נשאר בדיוק אותו הדבר */}
-      {isChronicleOpen && activeEvent && (
-          <ChronicleModal 
-            event={activeEvent} 
-            onClose={() => setIsChronicleOpen(false)} 
-          />
-      )}
-
+      {isChronicleOpen && activeEvent && <ChronicleModal event={activeEvent} onClose={() => setIsChronicleOpen(false)} />}
     </div>
   );
 };

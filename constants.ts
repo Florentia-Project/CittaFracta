@@ -2,7 +2,7 @@
 import { Family, HistoricalEvent } from './types';
 
 export const INITIAL_YEAR = 1215;
-export const MAX_YEAR = 1450; // Extended max year based on new data
+export const MAX_YEAR = 1302; // Extended max year based on new data
 
 const WIKIMEDIA_BASE = "https://commons.wikimedia.org/wiki/Special:FilePath";
 
