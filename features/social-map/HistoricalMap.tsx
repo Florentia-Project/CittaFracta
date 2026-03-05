@@ -1,8 +1,10 @@
 
 import React, { useMemo, useState, useRef, useLayoutEffect } from 'react';
-import { Family } from '../types';
+import { Family } from '../../types';
 import { calculateFamilyState } from './logic/engine';
 import { ZoomIn, ZoomOut, Maximize } from 'lucide-react';
+import { normalizeAssetPath } from '../../utils/assetPaths';
+import { deduplicateFamiliesByName } from './utils/deduplicateFamilies';
 
 interface HistoricalMapProps {
   data: Family[];
@@ -65,7 +67,11 @@ const HistoricalMap: React.FC<HistoricalMapProps> = ({ data, year, onSelectFamil
 
   // --- VIEW MODEL CALCULATION (Data Units) ---
   const viewModels = useMemo(() => {
-    const nodes = data.map(family => {
+    // Deduplicate families by name (remove duplicates from multiple locations)
+    // Families like "adimari_1", "adimari_2" all have the same family name
+    const uniqueData = deduplicateFamiliesByName(data);
+    
+    const nodes = uniqueData.map(family => {
       const state = calculateFamilyState(family, year);
       const hasCoA = !!family.coatOfArmsUrl;
       const coAWidth = hasCoA ? 4 : 0;
@@ -337,6 +343,11 @@ const HistoricalMap: React.FC<HistoricalMapProps> = ({ data, year, onSelectFamil
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
         onWheel={handleWheel}
+        onClick={(e) => {
+          if (e.target === e.currentTarget || (e.target as SVGElement).tagName === 'svg') {
+            onSelectFamily(null);
+          }
+        }}
       >
         <svg className="w-full h-full block">
           
@@ -395,7 +406,7 @@ const HistoricalMap: React.FC<HistoricalMapProps> = ({ data, year, onSelectFamil
                     {vm.hasCoA && vm.coatOfArmsUrl && (
                         <foreignObject x={imageX} y={-imageSize/2} width={imageSize} height={imageSize} className="overflow-visible">
                           <div className="w-full h-full flex items-center justify-center">
-                             <img src={vm.coatOfArmsUrl} alt="" className="w-full h-full object-contain" style={{ filter: 'sepia(0.2) contrast(1.1)', mixBlendMode: 'multiply' }} />
+                             <img src={normalizeAssetPath(vm.coatOfArmsUrl)} alt="" className="w-full h-full object-contain" style={{ filter: 'sepia(0.2) contrast(1.1)', mixBlendMode: 'multiply' }} />
                           </div>
                         </foreignObject>
                     )}

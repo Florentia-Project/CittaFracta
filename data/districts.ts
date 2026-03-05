@@ -1,12 +1,12 @@
 // src/data/districts.ts
 
-// --- Imports: SVG COA ---
-import imgOltrarno from '../assets/CoatOfArms/oltrarno.svg';
-import imgBorgo from '../assets/CoatOfArms/borgo.svg';
-import imgSanPiero from '../assets/CoatOfArms/san_piero.svg';
-import imgDuomo from '../assets/CoatOfArms/duomo.svg';
-import imgSanPancrazio from '../assets/CoatOfArms/san_pancrazio.svg';
-import imgPortaPiero from '../assets/CoatOfArms/porta_piero.svg';
+// --- Public Asset Paths ---
+const imgOltrarno = '/CittaFracta/assets/CoatOfArms/oltrarno.svg';
+const imgBorgo = '/CittaFracta/assets/CoatOfArms/borgo.svg';
+const imgSanPiero = '/CittaFracta/assets/CoatOfArms/san_piero.svg';
+const imgDuomo = '/CittaFracta/assets/CoatOfArms/duomo.svg';
+const imgSanPancrazio = '/CittaFracta/assets/CoatOfArms/san_pancrazio.svg';
+const imgPortaPiero = '/CittaFracta/assets/CoatOfArms/porta_piero.svg';
 
 // --- Constants: Historical Colors ---
 export const DISTRICT_COLORS = {

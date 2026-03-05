@@ -1,6 +1,7 @@
 import React from 'react';
 import { DistrictPolygon } from '../../../data/districts';
 import { X, Flag, Info } from 'lucide-react';
+import { normalizeAssetPath } from '../../../utils/assetPaths';
 
 interface MapSidebarProps {
     selectedDistrict: DistrictPolygon;
@@ -26,7 +27,7 @@ export const MapSidebar: React.FC<MapSidebarProps> = ({ selectedDistrict, curren
                 <div className="mb-6 text-center">
                     <div className="w-32 h-32 mx-auto mb-2 flex items-center justify-center">
                         {selectedDistrict.img ? (
-                            <img src={selectedDistrict.img} alt={selectedDistrict.name} className="w-full h-full object-contain drop-shadow-lg" />
+                            <img src={normalizeAssetPath(selectedDistrict.img)} alt={selectedDistrict.name} className="w-full h-full object-contain drop-shadow-lg" />
                         ) : (
                             <Flag size={60} style={{ color: selectedDistrict.color }} />
                         )}
