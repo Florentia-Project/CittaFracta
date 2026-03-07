@@ -55,7 +55,7 @@ const App: React.FC = () => {
       <div className="absolute inset-0 paper-texture z-50 pointer-events-none"></div>
 
       {/* Header */}
-      <header className="pt-4 pb-2 px-8 flex justify-between items-end shrink-0 z-40 relative border-b border-ink/40 mx-6">
+      <header className="pt-3 sm:pt-4 pb-2 px-4 sm:px-8 flex justify-between items-end shrink-0 z-40 relative border-b border-ink/40 mx-3 sm:mx-6">
         <Header />
         <TabNavigation activeTab={activeTab} setActiveTab={setActiveTab} />
       </header>

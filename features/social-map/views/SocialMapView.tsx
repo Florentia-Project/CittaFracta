@@ -25,8 +25,8 @@ export const SocialMapView: React.FC<SocialMapViewProps> = ({
   onOpenChronicle,
 }) => {
   return (
-    <div className="flex-1 relative h-full flex">
-      <div className="flex-1 relative h-full">
+    <div className="flex-1 relative h-full flex flex-col sm:flex-row">
+      <div className="flex-1 relative min-h-0">
         <HistoricalMap
           data={data}
           year={currentYear}

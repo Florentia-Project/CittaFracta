@@ -1,9 +1,43 @@
 # Project Status - Florentine Map (CittaFracta)
 
-**Last Updated**: March 4, 2026  
+**Last Updated**: March 7, 2026
 **Refactoring Phase**: 10/10 Complete ✨
 
 ## 🎯 Recent Accomplishments
+
+### ✅ Phase 11: Mobile Responsiveness (Complete) 📱
+
+Made the app fully usable on smartphones. All layout changes use Tailwind's `sm:` breakpoint (640 px) so desktop behavior is unchanged.
+
+**Files Changed**:
+1. **`features/social-map/HistoricalMap.tsx`** — Added touch event handlers:
+   - Single-finger drag → pans the map (`onTouchStart / onTouchMove / onTouchEnd`)
+   - Two-finger pinch → zooms toward the pinch center
+   - `style={{ touchAction: 'none' }}` prevents browser scroll interference
+   - Added refs: `pinchStart`, `pinchScaleStart`, `pinchCenter`
+
+2. **`features/social-map/views/SocialMapView.tsx`** — Layout stacks vertically on mobile:
+   - `flex flex-col sm:flex-row` — map on top, controls below on phones
+
+3. **`components/panels/TimelinePanel.tsx`** — Converts to a compact horizontal bottom bar on mobile:
+   - `w-full sm:w-48`, `flex sm:flex-col`, `border-t sm:border-l`
+   - Year + Play/Pause + event title visible in one row
+   - Long event description and keyboard shortcuts hidden on mobile (`hidden sm:block`)
+
+4. **`components/panels/FamilyDetailsPanel.tsx`** — Becomes a bottom sheet on mobile:
+   - Slides **up** from bottom on phones (`translate-y-full` → `translate-y-0`)
+   - Slides **in from right** on desktop (`translate-x-full` → `translate-x-0`)
+   - `w-full max-h-[65vh] rounded-t-2xl` on mobile vs `w-80 h-full` on desktop
+
+5. **`components/controls/TimelineSlider.tsx`** — Tighter padding on small screens:
+   - `px-12` → `px-4 sm:px-12`, `pb-6` → `pb-4 sm:pb-6`
+
+6. **`App.tsx`** — Reduced header padding on mobile:
+   - `px-8 mx-6` → `px-4 sm:px-8 mx-3 sm:mx-6`
+
+**Result**: ✅ App is usable on smartphones — touch pan/zoom on Social Map, responsive layouts across all panels, no desktop regressions.
+
+
 
 ### ✅ Phase 1-4: App.tsx Refactoring (Complete)
 Completed comprehensive modularization of monolithic App.tsx to improve maintainability and scalability.

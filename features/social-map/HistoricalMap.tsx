@@ -31,6 +31,11 @@ const HistoricalMap: React.FC<HistoricalMapProps> = ({ data, year, onSelectFamil
   const mouseStart = useRef({ x: 0, y: 0 });
   const hasPanned = useRef(false);
 
+  // Touch / Pinch Refs
+  const pinchStart = useRef(0);
+  const pinchScaleStart = useRef(1);
+  const pinchCenter = useRef({ x: 0, y: 0 });
+
   // --- INITIALIZATION & RESIZE ---
   useLayoutEffect(() => {
     if (!containerRef.current) return;
@@ -291,9 +296,64 @@ const HistoricalMap: React.FC<HistoricalMapProps> = ({ data, year, onSelectFamil
     }));
   };
 
-  const handleMouseUp = () => { 
+  const handleMouseUp = () => {
       isMouseDown.current = false;
-      setIsDragging(false); 
+      setIsDragging(false);
+      setTimeout(() => { hasPanned.current = false; }, 0);
+  };
+
+  // --- TOUCH HANDLERS (Mobile Pan + Pinch-Zoom) ---
+  const handleTouchStart = (e: React.TouchEvent) => {
+      if (e.touches.length === 1) {
+          isMouseDown.current = true;
+          hasPanned.current = false;
+          mouseStart.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+          dragStart.current = { x: transform.x, y: transform.y };
+      } else if (e.touches.length === 2) {
+          isMouseDown.current = false;
+          const dist = Math.hypot(
+              e.touches[0].clientX - e.touches[1].clientX,
+              e.touches[0].clientY - e.touches[1].clientY
+          );
+          pinchStart.current = dist;
+          pinchScaleStart.current = transform.k;
+          const rect = containerRef.current!.getBoundingClientRect();
+          pinchCenter.current = {
+              x: (e.touches[0].clientX + e.touches[1].clientX) / 2 - rect.left,
+              y: (e.touches[0].clientY + e.touches[1].clientY) / 2 - rect.top,
+          };
+          dragStart.current = { x: transform.x, y: transform.y };
+      }
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+      e.preventDefault();
+      if (e.touches.length === 1 && isMouseDown.current) {
+          const dx = e.touches[0].clientX - mouseStart.current.x;
+          const dy = e.touches[0].clientY - mouseStart.current.y;
+          if (!hasPanned.current) {
+              if (Math.sqrt(dx * dx + dy * dy) > 6) hasPanned.current = true;
+              else return;
+          }
+          setTransform(prev => ({ ...prev, x: dragStart.current.x + dx, y: dragStart.current.y + dy }));
+      } else if (e.touches.length === 2) {
+          const dist = Math.hypot(
+              e.touches[0].clientX - e.touches[1].clientX,
+              e.touches[0].clientY - e.touches[1].clientY
+          );
+          const newK = Math.max(0.5, Math.min(20, pinchScaleStart.current * (dist / pinchStart.current)));
+          const cx = pinchCenter.current.x;
+          const cy = pinchCenter.current.y;
+          setTransform({
+              k: newK,
+              x: cx - (cx - dragStart.current.x) * (newK / pinchScaleStart.current),
+              y: cy - (cy - dragStart.current.y) * (newK / pinchScaleStart.current),
+          });
+      }
+  };
+
+  const handleTouchEnd = () => {
+      isMouseDown.current = false;
       setTimeout(() => { hasPanned.current = false; }, 0);
   };
 
@@ -336,13 +396,17 @@ const HistoricalMap: React.FC<HistoricalMapProps> = ({ data, year, onSelectFamil
         <button onClick={resetZoom} className="bg-parchment-dark border border-ink/20 p-2 rounded shadow hover:bg-white"><Maximize size={16}/></button>
       </div>
 
-      <div 
+      <div
         className={`w-full h-full ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
+        style={{ touchAction: 'none' }}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
         onWheel={handleWheel}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
         onClick={(e) => {
           if (e.target === e.currentTarget || (e.target as SVGElement).tagName === 'svg') {
             onSelectFamily(null);
@@ -406,7 +470,7 @@ const HistoricalMap: React.FC<HistoricalMapProps> = ({ data, year, onSelectFamil
                     {vm.hasCoA && vm.coatOfArmsUrl && (
                         <foreignObject x={imageX} y={-imageSize/2} width={imageSize} height={imageSize} className="overflow-visible">
                           <div className="w-full h-full flex items-center justify-center">
-                             <img src={normalizeAssetPath(vm.coatOfArmsUrl)} alt="" className="w-full h-full object-contain" style={{ filter: 'sepia(0.2) contrast(1.1)', mixBlendMode: 'multiply' }} />
+                             <img src={normalizeAssetPath(vm.coatOfArmsUrl)} alt="" className="w-full h-full object-cover" style={{ filter: 'sepia(0.2) contrast(1.1)', mixBlendMode: 'multiply' }} />
                           </div>
                         </foreignObject>
                     )}

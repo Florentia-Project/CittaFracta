@@ -16,7 +16,7 @@ export const TimelineSlider: React.FC<TimelineSliderProps> = ({
   jumpToEvent,
 }) => {
   return (
-    <div className="bg-parchment pb-6 pt-2 px-12 shrink-0 z-30 relative">
+    <div className="bg-parchment pb-4 sm:pb-6 pt-2 px-4 sm:px-12 shrink-0 z-30 relative">
       <div className="max-w-6xl mx-auto w-full relative flex items-center gap-8">
         <div className="relative h-12 flex items-center flex-1">
           <div className="absolute w-full h-[1px] bg-ink/30"></div>

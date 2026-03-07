@@ -18,9 +18,18 @@ export const FamilyDetailsPanel: React.FC<FamilyDetailsPanelProps> = ({
 }) => {
   return (
     <div
-      className={`absolute top-0 right-0 bottom-0 w-80 bg-parchment border-l border-ink/20 shadow-[-5px_0_15px_-5px_rgba(0,0,0,0.1)] transition-transform duration-300 transform z-40 ${
-        selectedFamily ? 'translate-x-0' : 'translate-x-full'
-      }`}
+      className={`absolute z-40
+        bottom-0 left-0 right-0 w-full max-h-[65vh]
+        sm:bottom-auto sm:left-auto sm:right-0 sm:top-0 sm:w-80 sm:max-h-none sm:h-full
+        bg-parchment
+        border-t sm:border-t-0 sm:border-l border-ink/20
+        shadow-[0_-4px_15px_-5px_rgba(0,0,0,0.12)] sm:shadow-[-5px_0_15px_-5px_rgba(0,0,0,0.1)]
+        rounded-t-2xl sm:rounded-none
+        transition-transform duration-300 transform
+        ${selectedFamily
+          ? 'translate-y-0 sm:translate-x-0'
+          : 'translate-y-full sm:translate-y-0 sm:translate-x-full'
+        }`}
     >
       {selectedFamily && currentState && (
         <div className="h-full flex flex-col p-6 overflow-y-auto">
