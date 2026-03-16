@@ -18,7 +18,7 @@ export function CodexDock({ activeTab, setActiveTab, currentYear, onYearTap }: C
         style={{ borderRadius: 0 }}
       >
         <span className="font-label text-base leading-none">⊕</span>
-        <span className="font-label text-[8px] tracking-widest">FAZIONI</span>
+        <span className="font-label text-[8px] tracking-widest">FACTIONS</span>
       </button>
 
       {/* ANNO */}
@@ -32,14 +32,14 @@ export function CodexDock({ activeTab, setActiveTab, currentYear, onYearTap }: C
         <span className="font-label text-[6px] tracking-widest text-ink-faded mt-0.5">ANNO DOMINI</span>
       </button>
 
-      {/* CITTÀ */}
+      {/* CITY */}
       <button
         onClick={() => setActiveTab('city')}
         className={`flex flex-col items-center justify-center gap-0.5 ${activeTab === 'city' ? 'text-rubric border-t-2 border-rubric' : 'text-ink-faded'}`}
         style={{ borderRadius: 0 }}
       >
         <span className="font-label text-base leading-none">◈</span>
-        <span className="font-label text-[8px] tracking-widest">CITTÀ</span>
+        <span className="font-label text-[8px] tracking-widest">CITY</span>
       </button>
 
     </nav>

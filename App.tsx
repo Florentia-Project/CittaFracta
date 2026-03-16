@@ -72,8 +72,8 @@ const App: React.FC = () => {
           F
         </span>
         <div className="flex flex-col gap-1.5">
-          <p className="font-label text-rubric text-[10px] tracking-[0.4em]">ARCHIVIO FIORENTINO</p>
-          <p className="font-serif text-sm text-ink-faded italic">Caricamento dei registri storici…</p>
+          <p className="font-label text-rubric text-[10px] tracking-[0.4em]">FLORENTINE ARCHIVE</p>
+          <p className="font-serif text-sm text-ink-faded italic">Loading historical records…</p>
         </div>
       </div>
     );

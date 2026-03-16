@@ -7,7 +7,7 @@ interface FolioHeaderProps {
 }
 
 export function FolioHeader({ activeTab, isHistoricalMode, toggleHistoricalMode }: FolioHeaderProps) {
-  const title = activeTab === 'city' ? 'CITTÀ DI FIRENZE' : 'FAZIONI';
+  const title = activeTab === 'city' ? 'CITY OF FLORENCE' : 'FACTIONS';
 
   return (
     <header className="sm:hidden h-11 flex items-center justify-between px-4 bg-parchment border-b border-parchment-deep shrink-0 z-30">

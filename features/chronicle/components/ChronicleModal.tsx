@@ -31,9 +31,9 @@ const ChronicleModal: React.FC<ChronicleModalProps> = ({ event, onClose }) => {
             className="font-label text-[9px] tracking-wide text-rubric min-h-[44px] flex items-center"
             style={{ borderRadius: 0 }}
           >
-            ← TORNA
+            ← BACK
           </button>
-          <span className="font-label text-[8px] tracking-[0.3em] text-ink-faded">CRONACA</span>
+          <span className="font-label text-[8px] tracking-[0.3em] text-ink-faded">CHRONICLE</span>
           <div className="w-16" />
         </div>
 
@@ -65,7 +65,7 @@ const ChronicleModal: React.FC<ChronicleModalProps> = ({ event, onClose }) => {
           {/* Sources */}
           {event.sources && event.sources.length > 0 && (
             <div className="mt-10 pt-6 border-t border-parchment-deep clear-both">
-              <p className="font-label text-[8px] tracking-[0.3em] text-ink-faded mb-3">§ FONTI STORICHE</p>
+              <p className="font-label text-[8px] tracking-[0.3em] text-ink-faded mb-3">§ HISTORICAL SOURCES</p>
               <ul className="space-y-3">
                 {event.sources.map((source, idx) => (
                   <li key={idx} className="font-serif text-sm italic text-ink-faded">

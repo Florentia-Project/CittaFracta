@@ -57,14 +57,14 @@ export function YearSheet({
             className="font-label text-[9px] tracking-wide text-rubric min-h-[44px] px-4"
             style={{ borderRadius: 0 }}
           >
-            ◀ PRECEDENTE
+            ◀ PREVIOUS
           </button>
           <button
             onClick={onNextEvent}
             className="font-label text-[9px] tracking-wide text-rubric min-h-[44px] px-4"
             style={{ borderRadius: 0 }}
           >
-            SUCCESSIVO ▶
+            NEXT ▶
           </button>
         </div>
 
@@ -81,7 +81,7 @@ export function YearSheet({
           }`}
           style={{ borderRadius: 0 }}
         >
-          {isPlaying ? '◼  FERMA' : '▶  AVANZA NEL TEMPO'}
+          {isPlaying ? '◼  STOP' : '▶  ADVANCE THROUGH TIME'}
         </button>
       </div>
     </>

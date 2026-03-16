@@ -24,16 +24,16 @@ interface FilterFolioProps {
 }
 
 const LAYER_LABELS: Record<string, string> = {
-  clean: 'PULITA',
-  satellite: 'VEDUTA',
-  dark: 'OSCURA',
+  clean: 'CLEAN',
+  satellite: 'SATELLITE',
+  dark: 'DARK',
 };
 
 const REL_TYPES = [
-  { key: 'Marriage', label: 'MATRIMONIO' },
-  { key: 'Blood', label: 'SANGUE' },
-  { key: 'Feud', label: 'FAIDA' },
-  { key: 'Alliance', label: 'ALLEANZA' },
+  { key: 'Marriage', label: 'MARRIAGE' },
+  { key: 'Blood', label: 'BLOOD' },
+  { key: 'Feud', label: 'FEUD' },
+  { key: 'Alliance', label: 'ALLIANCE' },
 ];
 
 function ManuscriptCheckbox({ checked, onToggle }: { checked: boolean; onToggle: () => void }) {
@@ -83,12 +83,12 @@ export function FilterFolio({
       >
         {/* Header */}
         <div className="flex justify-between items-center px-4 h-11 shrink-0 border-b border-parchment-deep">
-          <span className="font-label text-[9px] tracking-[0.3em] text-rubric">§ FILTRI</span>
+          <span className="font-label text-[9px] tracking-[0.3em] text-rubric">§ FILTERS</span>
           <button
             onClick={onClose}
             className="font-label text-lg text-ink-faded min-w-[44px] min-h-[44px] flex items-center justify-center"
             style={{ borderRadius: 0 }}
-            aria-label="Chiudi"
+            aria-label="Close"
           >
             ✕
           </button>
@@ -98,7 +98,7 @@ export function FilterFolio({
         <div className="flex-1 overflow-y-auto px-4 pb-8">
 
           {/* Map layers */}
-          <p className="font-label text-[8px] tracking-[0.3em] text-ink-faded mt-5 mb-2">¶ STRATI DELLA MAPPA</p>
+          <p className="font-label text-[8px] tracking-[0.3em] text-ink-faded mt-5 mb-2">¶ MAP LAYERS</p>
           <div className="flex gap-1">
             {(['clean', 'satellite', 'dark'] as const).map(k => (
               <button
@@ -117,17 +117,17 @@ export function FilterFolio({
           </div>
 
           {/* 1584 overlay */}
-          <p className="font-label text-[8px] tracking-[0.3em] text-ink-faded mt-5 mb-2">¶ CARTA DEL 1584</p>
+          <p className="font-label text-[8px] tracking-[0.3em] text-ink-faded mt-5 mb-2">¶ 1584 MAP OVERLAY</p>
           <div className="flex items-center gap-3 mb-2">
             <ManuscriptCheckbox
               checked={showHistoricalMap}
               onToggle={() => setShowHistoricalMap(!showHistoricalMap)}
             />
-            <span className="font-serif text-sm text-ink">Sovrapposizione storica</span>
+            <span className="font-serif text-sm text-ink">Historical overlay</span>
           </div>
           {showHistoricalMap && (
             <div className="flex items-center gap-3">
-              <span className="font-label text-[8px] text-ink-faded tracking-wider">OPACITÀ</span>
+              <span className="font-label text-[8px] text-ink-faded tracking-wider">OPACITY</span>
               <input
                 type="range"
                 min="0"
@@ -144,7 +144,7 @@ export function FilterFolio({
           )}
 
           {/* Districts */}
-          <p className="font-label text-[8px] tracking-[0.3em] text-ink-faded mt-5 mb-2">¶ SESTIERI</p>
+          <p className="font-label text-[8px] tracking-[0.3em] text-ink-faded mt-5 mb-2">¶ DISTRICTS</p>
           <div className="flex items-center gap-3">
             <ManuscriptCheckbox
               checked={showDistricts}
@@ -154,7 +154,7 @@ export function FilterFolio({
           </div>
 
           {/* Color mode */}
-          <p className="font-label text-[8px] tracking-[0.3em] text-ink-faded mt-5 mb-2">¶ COLORE SIMBOLI</p>
+          <p className="font-label text-[8px] tracking-[0.3em] text-ink-faded mt-5 mb-2">¶ SYMBOL COLOR</p>
           <div className="flex gap-1">
             {(['default', 'guild'] as const).map(mode => (
               <button
@@ -167,13 +167,13 @@ export function FilterFolio({
                 }`}
                 style={{ borderRadius: 0 }}
               >
-                {mode === 'default' ? 'FAZIONE' : 'CORPORAZIONE'}
+                {mode === 'default' ? 'FACTION' : 'GUILD'}
               </button>
             ))}
           </div>
 
           {/* Relationships */}
-          <p className="font-label text-[8px] tracking-[0.3em] text-ink-faded mt-5 mb-2">¶ RELAZIONI</p>
+          <p className="font-label text-[8px] tracking-[0.3em] text-ink-faded mt-5 mb-2">¶ RELATIONSHIPS</p>
           <div className="grid grid-cols-2 gap-1">
             {REL_TYPES.map(({ key, label }) => (
               <button

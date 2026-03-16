@@ -66,7 +66,7 @@ export const FamilyDetailsPanel: React.FC<FamilyDetailsPanelProps> = ({
               </h2>
               <p className="font-label text-[9px] tracking-[0.2em] text-rubric uppercase">
                 {currentState.currentFactionLabel}
-                {currentState.isExiled && ' · ESILIATO'}
+                {currentState.isExiled && ' · EXILED'}
                 {currentState.isMagnate && ' · MAGNATE'}
               </p>
               <p className="font-label text-[9px] tracking-[0.2em] text-ink-faded uppercase">
@@ -79,14 +79,14 @@ export const FamilyDetailsPanel: React.FC<FamilyDetailsPanelProps> = ({
           <div className="flex-1 overflow-y-auto px-4 py-4">
 
             {/* Stato Politico */}
-            <SectionHeader sigil="§" label="Stato Politico" />
+            <SectionHeader sigil="§" label="Political Status" />
             <div className="flex flex-wrap gap-2 mb-1">
               <span className={`px-2 py-1 border text-xs font-serif ${
                 currentState.isExiled
                   ? 'bg-earth-orange/20 text-earth-orange border-earth-orange/40'
                   : 'bg-parchment-mid text-ink border-parchment-deep'
               }`}>
-                {currentState.isExiled ? 'Esiliato' : currentState.currentStatusLabel}
+                {currentState.isExiled ? 'Exiled' : currentState.currentStatusLabel}
               </span>
               <span className="px-2 py-1 border border-parchment-deep text-xs font-serif bg-parchment-mid text-ink">
                 {currentState.currentFactionLabel}
@@ -101,7 +101,7 @@ export const FamilyDetailsPanel: React.FC<FamilyDetailsPanelProps> = ({
             <hr className="border-t border-parchment-deep my-4" />
 
             {/* Origini */}
-            <SectionHeader sigil="¶" label="Origini e Luoghi" />
+            <SectionHeader sigil="¶" label="Origins & Places" />
             <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm font-serif mb-1">
               <div>
                 <span className="block text-ink-faded text-[10px] italic font-label">
@@ -112,20 +112,20 @@ export const FamilyDetailsPanel: React.FC<FamilyDetailsPanelProps> = ({
                 </span>
               </div>
               <div>
-                <span className="block text-ink-faded text-[10px] italic font-label">Coordinate</span>
+                <span className="block text-ink-faded text-[10px] italic font-label">Coordinates</span>
                 <span className="text-ink text-[13px]">
-                  {selectedFamily.coordinates ? 'Mappato' : 'Non mappato'}
+                  {selectedFamily.coordinates ? 'Mapped' : 'Not mapped'}
                 </span>
               </div>
               {selectedFamily.originalFaction && (
                 <div>
-                  <span className="block text-ink-faded text-[10px] italic font-label">Fazione orig.</span>
+                  <span className="block text-ink-faded text-[10px] italic font-label">Orig. faction</span>
                   <span className="text-ink text-[13px]">{selectedFamily.originalFaction}</span>
                 </div>
               )}
               {selectedFamily.originalStatus && (
                 <div>
-                  <span className="block text-ink-faded text-[10px] italic font-label">Classe orig.</span>
+                  <span className="block text-ink-faded text-[10px] italic font-label">Orig. class</span>
                   <span className="text-ink text-[13px]">{selectedFamily.originalStatus}</span>
                 </div>
               )}
@@ -135,7 +135,7 @@ export const FamilyDetailsPanel: React.FC<FamilyDetailsPanelProps> = ({
             {selectedFamily.noticeablePeople && (
               <>
                 <hr className="border-t border-parchment-deep my-4" />
-                <SectionHeader sigil="✦" label="Persone Notevoli" />
+                <SectionHeader sigil="✦" label="Notable People" />
                 <p className="text-sm font-serif text-ink leading-relaxed">
                   {selectedFamily.noticeablePeople}
                 </p>
@@ -146,16 +146,16 @@ export const FamilyDetailsPanel: React.FC<FamilyDetailsPanelProps> = ({
             {(selectedFamily.occupation || selectedFamily.propertyType) && (
               <>
                 <hr className="border-t border-parchment-deep my-4" />
-                <SectionHeader sigil="¶" label="Economia" />
+                <SectionHeader sigil="¶" label="Economy" />
                 {selectedFamily.occupation && (
                   <p className="text-sm font-serif text-ink mb-1">
-                    <span className="italic text-ink-faded">Occupazione: </span>
+                    <span className="italic text-ink-faded">Occupation: </span>
                     {selectedFamily.occupation}
                   </p>
                 )}
                 {selectedFamily.propertyType && (
                   <p className="text-sm font-serif text-ink">
-                    <span className="italic text-ink-faded">Proprietà: </span>
+                    <span className="italic text-ink-faded">Property: </span>
                     {selectedFamily.propertyType}
                   </p>
                 )}
@@ -166,7 +166,7 @@ export const FamilyDetailsPanel: React.FC<FamilyDetailsPanelProps> = ({
             {(selectedFamily.originalSourceTerm || selectedFamily.sourceCitation) && (
               <>
                 <hr className="border-t border-parchment-deep my-4" />
-                <SectionHeader sigil="§" label="Fonti" />
+                <SectionHeader sigil="§" label="Sources" />
                 {selectedFamily.originalSourceTerm && (
                   <p className="text-xs font-serif text-ink-faded italic mb-1">
                     {selectedFamily.originalSourceTerm}
@@ -174,7 +174,7 @@ export const FamilyDetailsPanel: React.FC<FamilyDetailsPanelProps> = ({
                 )}
                 {selectedFamily.sourceCitation && (
                   <p className="text-[10px] font-label text-ink-faded tracking-wide">
-                    Rif: {selectedFamily.sourceCitation}
+                    Ref: {selectedFamily.sourceCitation}
                   </p>
                 )}
               </>
@@ -188,7 +188,7 @@ export const FamilyDetailsPanel: React.FC<FamilyDetailsPanelProps> = ({
             className="shrink-0 mx-4 mb-4 mt-2 h-12 border border-rubric/40 bg-transparent font-label text-[9px] tracking-[0.3em] text-rubric"
             style={{ borderRadius: 0, width: 'calc(100% - 2rem)' }}
           >
-            ✕  CHIUDI
+            ✕  CLOSE
           </button>
         </>
       )}

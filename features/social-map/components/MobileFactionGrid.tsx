@@ -164,29 +164,29 @@ export const MobileFactionGrid: React.FC<MobileFactionGridProps> = ({
       {/* Sticky column headers */}
       <div className="col-span-2 sticky top-0 z-20 bg-parchment grid grid-cols-2">
         <div className="h-9 flex items-center justify-center font-label text-[9px] tracking-[0.2em] text-rubric border-b border-parchment-deep">
-          GHIBELLINI
+          GHIBELLINES
         </div>
         <div className="h-9 flex items-center justify-center font-label text-[9px] tracking-[0.2em] text-rubric border-b border-parchment-deep border-l border-parchment-deep/40">
-          GUELFI
+          GUELFS
         </div>
       </div>
 
       <ClassSection
-        label="GRANDI"
+        label="NOBLES"
         ghib={grouped.grandi.ghib}
         guelf={grouped.grandi.guelf}
         selectedFamilyId={selectedFamilyId}
         onSelectFamily={onSelectFamily}
       />
       <ClassSection
-        label="GRASSI"
+        label="MERCHANT ELITE"
         ghib={grouped.grassi.ghib}
         guelf={grouped.grassi.guelf}
         selectedFamilyId={selectedFamilyId}
         onSelectFamily={onSelectFamily}
       />
       <ClassSection
-        label="POPOLO"
+        label="PEOPLE"
         ghib={grouped.popolo.ghib}
         guelf={grouped.popolo.guelf}
         selectedFamilyId={selectedFamilyId}

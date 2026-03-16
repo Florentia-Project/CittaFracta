@@ -515,8 +515,8 @@ const HistoricalMap: React.FC<HistoricalMapProps> = ({ data, year, onSelectFamil
           </defs>
 
           {/* Top Sticky Headers (Factions) - Y is fixed, X tracks map */}
-          <text x={getX(75)} y={topLabelY} textAnchor="middle" filter="url(#text-halo)" className="font-display text-sm fill-ink font-bold tracking-[0.3em] uppercase pointer-events-none">Ghibellini</text>
-          <text x={getX(185)} y={topLabelY} textAnchor="middle" filter="url(#text-halo)" className="font-display text-sm fill-ink font-bold tracking-[0.3em] uppercase pointer-events-none">Guelfi</text>
+          <text x={getX(75)} y={topLabelY} textAnchor="middle" filter="url(#text-halo)" className="font-display text-sm fill-ink font-bold tracking-[0.3em] uppercase pointer-events-none">Ghibellines</text>
+          <text x={getX(185)} y={topLabelY} textAnchor="middle" filter="url(#text-halo)" className="font-display text-sm fill-ink font-bold tracking-[0.3em] uppercase pointer-events-none">Guelfs</text>
           
           {year >= 1300 && (
              <>
@@ -527,9 +527,9 @@ const HistoricalMap: React.FC<HistoricalMapProps> = ({ data, year, onSelectFamil
 
           {/* Left Sticky Headers (Classes) - X is fixed, Y tracks map */}
           {/* Note: In data, Row Centers are approx 26, 57, 85. Or use lane tops 14, 46, 78 */}
-          <text x={leftLabelX} y={getY(26.5)} textAnchor="start" filter="url(#text-halo)" className="font-display text-xs fill-ink font-bold tracking-[0.2em] uppercase opacity-70 pointer-events-none">Grandi</text>
-          <text x={leftLabelX} y={getY(57)} textAnchor="start" filter="url(#text-halo)" className="font-display text-xs fill-ink font-bold tracking-[0.2em] uppercase opacity-70 pointer-events-none">Grassi</text>
-          <text x={leftLabelX} y={getY(85)} textAnchor="start" filter="url(#text-halo)" className="font-display text-xs fill-ink font-bold tracking-[0.2em] uppercase opacity-70 pointer-events-none">Popolo</text>
+          <text x={leftLabelX} y={getY(26.5)} textAnchor="start" filter="url(#text-halo)" className="font-display text-xs fill-ink font-bold tracking-[0.2em] uppercase opacity-70 pointer-events-none">Nobles</text>
+          <text x={leftLabelX} y={getY(57)} textAnchor="start" filter="url(#text-halo)" className="font-display text-xs fill-ink font-bold tracking-[0.2em] uppercase opacity-70 pointer-events-none">Merchant Elite</text>
+          <text x={leftLabelX} y={getY(85)} textAnchor="start" filter="url(#text-halo)" className="font-display text-xs fill-ink font-bold tracking-[0.2em] uppercase opacity-70 pointer-events-none">People</text>
 
         </svg>
       </div>
