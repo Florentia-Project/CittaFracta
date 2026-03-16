@@ -35,7 +35,12 @@ export const FamiliesListPanel: React.FC<FamiliesListPanelProps> = ({
     const totalFamilies = Object.values(groupedList).reduce((sum: number, arr: Family[]) => sum + arr.length, 0);
 
     return (
-        <Section title={`Families (${totalFamilies})`} icon={Users} isOpen={isOpen} onToggle={onToggle}>
+        <Section
+            title={`Families (${totalFamilies})`}
+            icon={Users}
+            isOpen={isOpen}
+            onToggle={onToggle}
+        >
             <div className="space-y-2">
                 {Object.entries(groupedList).sort().map(([sesto, families]: [string, Family[]]) => {
                     if ((families as Family[]).length === 0) return null;

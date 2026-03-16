@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect, useRef } from 'react';
+import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { MapContainer, Marker, Popup, TileLayer, useMapEvents, Polygon, Tooltip } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -8,6 +8,7 @@ import ConnectionsLayer from './components/ConnectionsLayer';
 import FiltersControl from './components/FiltersControl';
 import { LeftSidebar } from './components/LeftSidebar';
 import { DistrictsSidebar } from './components/DistrictsSidebar';
+import { FilterFolio } from './components/FilterFolio';
 import TimelineControl from '../social-map/components/TimelineControl';
 
 // --- Utilities ---
@@ -111,6 +112,8 @@ interface GeographicalMapProps {
 export const GeographicalMap: React.FC<GeographicalMapProps> = ({ 
   data, year, onYearChange, onSelectFamily, selectedFamilyId
 }) => {
+  const [filterFolioOpen, setFilterFolioOpen] = useState(false);
+
   // Use custom hooks for state management
   const {
     mapInstance,
@@ -195,7 +198,8 @@ export const GeographicalMap: React.FC<GeographicalMapProps> = ({
   return (
     <div className="flex h-full w-full bg-parchment overflow-hidden relative">
       
-      {/* LEFT SIDEBAR */}
+      {/* LEFT SIDEBAR — desktop only */}
+      <div className="hidden sm:flex">
       <LeftSidebar
         searchTerm={searchTerm}
         setSearchTerm={setSearchTerm}
@@ -228,10 +232,29 @@ export const GeographicalMap: React.FC<GeographicalMapProps> = ({
         openSections={openSections}
         toggleSection={toggleSection}
       />
+      </div>
 
       {/* MAP AREA */}
       <div className="flex-1 relative bg-[#E6DCCF] flex">
         <div className="flex-1 relative h-full">
+
+          {/* Mobile: floating year pill — fixed so Leaflet can't capture its events */}
+          <div
+            className="sm:hidden fixed top-14 left-1/2 -translate-x-1/2 z-[1001] bg-parchment/90 border border-parchment-deep px-4 py-1.5 font-display text-sm text-ink pointer-events-none"
+            style={{ borderRadius: 0 }}
+          >
+            {year}
+          </div>
+
+          {/* Mobile: floating filter button — fixed so Leaflet can't capture its events */}
+          <button
+            onClick={() => setFilterFolioOpen(true)}
+            className="sm:hidden fixed z-[1001] w-11 h-11 bg-parchment border border-parchment-deep flex items-center justify-center font-label text-rubric text-xl"
+            style={{ borderRadius: 0, bottom: '88px', right: '16px', boxShadow: '2px 2px 0 rgba(44,26,14,0.15)' }}
+            aria-label="Apri filtri"
+          >
+            §
+          </button>
             <MapContainer 
                 center={FLORENCE_CENTER} zoom={15} minZoom={13} maxZoom={22}
                 style={{ height: "100%", width: "100%" }}
@@ -322,13 +345,31 @@ export const GeographicalMap: React.FC<GeographicalMapProps> = ({
 
         {/* RIGHT SIDEBAR - Districts Details */}
         {selectedDistrict && (
-            <DistrictsSidebar 
+            <DistrictsSidebar
                 selectedDistrict={selectedDistrict}
                 currentYear={year}
                 onClose={() => setSelectedDistrict(null)}
             />
         )}
       </div>
+
+      {/* Mobile: filter folio bottom sheet */}
+      <FilterFolio
+        isOpen={filterFolioOpen}
+        onClose={() => setFilterFolioOpen(false)}
+        baseLayerKey={baseLayerKey}
+        setBaseLayerKey={setBaseLayerKey}
+        showHistoricalMap={showHistoricalMap}
+        setShowHistoricalMap={setShowHistoricalMap}
+        mapOpacity={mapOpacity}
+        setMapOpacity={setMapOpacity}
+        showDistricts={showDistricts}
+        setShowDistricts={setShowDistricts}
+        colorMode={colorMode}
+        setColorMode={setColorMode}
+        activeRelTypes={activeRelTypes}
+        toggleRelType={toggleRelType}
+      />
     </div>
   );
 };

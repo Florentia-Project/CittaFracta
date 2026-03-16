@@ -1,13 +1,22 @@
 import React from 'react';
 import { Family, CalculatedState } from '../../types';
-import { X } from 'lucide-react';
 import { getFamilyDistrict } from '../../utils/districtUtils';
+import { normalizeAssetPath } from '../../utils/assetPaths';
 
 interface FamilyDetailsPanelProps {
   selectedFamily: Family | null;
   currentState: CalculatedState | null;
   currentYear: number;
   onClose: () => void;
+}
+
+function SectionHeader({ sigil, label }: { sigil: string; label: string }) {
+  return (
+    <div className="flex items-center gap-2 mb-2">
+      <span className="font-label text-xs text-rubric">{sigil}</span>
+      <span className="font-label text-[8px] tracking-[0.3em] text-ink-faded uppercase">{label}</span>
+    </div>
+  );
 }
 
 export const FamilyDetailsPanel: React.FC<FamilyDetailsPanelProps> = ({
@@ -19,155 +28,169 @@ export const FamilyDetailsPanel: React.FC<FamilyDetailsPanelProps> = ({
   return (
     <div
       className={`absolute z-40
-        bottom-0 left-0 right-0 w-full max-h-[65vh]
-        sm:bottom-auto sm:left-auto sm:right-0 sm:top-0 sm:w-80 sm:max-h-none sm:h-full
+        bottom-0 left-0 right-0 w-full max-h-[82vh]
+        sm:bottom-auto sm:left-auto sm:right-0 sm:top-0 sm:w-80 sm:max-h-full sm:h-full
         bg-parchment
-        border-t sm:border-t-0 sm:border-l border-ink/20
+        border-t-2 border-parchment-deep
+        sm:border-t-0 sm:border-l sm:border-parchment-deep
         shadow-[0_-4px_15px_-5px_rgba(0,0,0,0.12)] sm:shadow-[-5px_0_15px_-5px_rgba(0,0,0,0.1)]
-        rounded-t-2xl sm:rounded-none
-        transition-transform duration-300 transform
+        transition-transform duration-300 transform flex flex-col
         ${selectedFamily
           ? 'translate-y-0 sm:translate-x-0'
           : 'translate-y-full sm:translate-y-0 sm:translate-x-full'
         }`}
+      style={{ borderRadius: 0 }}
     >
+      {/* Drag handle — mobile only */}
+      <div className="sm:hidden w-12 h-0.5 bg-parchment-deep/60 mx-auto mt-3 mb-3 shrink-0" />
+
       {selectedFamily && currentState && (
-        <div className="h-full flex flex-col p-6 overflow-y-auto">
-          <div className="flex justify-between items-start mb-6">
-            <h2 className="text-xl font-display font-bold text-ink">
-              {selectedFamily.name}
-            </h2>
-            <button
-              onClick={onClose}
-              className="text-ink-light hover:text-ink p-1"
-            >
-              <X size={20} />
-            </button>
-          </div>
-
-          {selectedFamily.coatOfArmsUrl && (
-            <div className="w-full h-32 mb-6 p-4 border border-ink/10 bg-parchment-dark/10 rounded flex items-center justify-center">
+        <>
+          {/* Non-scrolling family header */}
+          <div className="flex items-start gap-3 px-4 pb-4 border-b border-parchment-deep shrink-0">
+            {selectedFamily.coatOfArmsUrl ? (
               <img
-                src={selectedFamily.coatOfArmsUrl}
-                alt={`${selectedFamily.name} Coat of Arms`}
+                src={normalizeAssetPath(selectedFamily.coatOfArmsUrl)}
+                alt=""
                 referrerPolicy="no-referrer"
-                className="h-full object-contain mix-blend-multiply"
+                className="w-14 h-14 object-contain shrink-0"
               />
-            </div>
-          )}
-
-          <div className="space-y-6">
-            <div>
-              <h3 className="text-[10px] font-sans font-bold uppercase tracking-widest text-ink-light mb-1">
-                Current Status ({currentYear})
-              </h3>
-              <div className="flex flex-wrap gap-2">
-                <span
-                  className={`px-2 py-1 border border-ink/20 text-xs font-serif ${
-                    currentState.isExiled
-                      ? 'bg-earth-orange text-parchment border-earth-orange'
-                      : 'bg-parchment-dark/30 text-ink'
-                  }`}
-                >
-                  {currentState.isExiled
-                    ? 'Exiled'
-                    : currentState.currentStatusLabel}
-                </span>
-                <span className="px-2 py-1 border border-ink/20 text-xs font-serif bg-parchment-dark/30 text-ink">
-                  {currentState.currentFactionLabel}
-                </span>
-              </div>
-            </div>
-
-            <div className="border-t border-ink/10 pt-4">
-              <h3 className="text-[10px] font-sans font-bold uppercase tracking-widest text-ink-light mb-2">
-                Origins & Locations
-              </h3>
-              <div className="grid grid-cols-2 gap-2 text-sm font-serif">
-                <div>
-                  <span className="block text-ink-light text-xs italic">
-                    District ({currentYear < 1343 ? 'Sesto' : 'Quartiere'})
-                  </span>
-                  <span className="text-ink">
-                    {getFamilyDistrict(selectedFamily, currentYear)}
-                  </span>
-                </div>
-                <div>
-                  <span className="block text-ink-light text-xs italic">
-                    Coordinates
-                  </span>
-                  <span className="text-ink">
-                    {selectedFamily.coordinates ? 'Mapped' : 'Unmapped'}
-                  </span>
-                </div>
-                <div>
-                  <span className="block text-ink-light text-xs italic">
-                    Original Faction
-                  </span>
-                  <span className="text-ink">
-                    {selectedFamily.originalFaction}
-                  </span>
-                </div>
-                <div>
-                  <span className="block text-ink-light text-xs italic">
-                    Original Status
-                  </span>
-                  <span className="text-ink">
-                    {selectedFamily.originalStatus}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {selectedFamily.noticeablePeople && (
-              <div className="border-t border-ink/10 pt-4">
-                <h3 className="text-[10px] font-sans font-bold uppercase tracking-widest text-ink-light mb-1">
-                  Noticeable People
-                </h3>
-                <p className="text-sm font-serif text-ink">
-                  {selectedFamily.noticeablePeople}
-                </p>
+            ) : (
+              <div className="w-14 h-14 shrink-0 border border-parchment-deep flex items-center justify-center font-label text-2xl text-parchment-deep">
+                ✦
               </div>
             )}
+            <div className="flex-1 min-w-0 pt-1">
+              <h2 className="font-display text-xl text-ink leading-tight mb-1">
+                {selectedFamily.name}
+              </h2>
+              <p className="font-label text-[9px] tracking-[0.2em] text-rubric uppercase">
+                {currentState.currentFactionLabel}
+                {currentState.isExiled && ' · ESILIATO'}
+                {currentState.isMagnate && ' · MAGNATE'}
+              </p>
+              <p className="font-label text-[9px] tracking-[0.2em] text-ink-faded uppercase">
+                {currentState.currentStatusLabel}
+              </p>
+            </div>
+          </div>
 
+          {/* Scrollable body */}
+          <div className="flex-1 overflow-y-auto px-4 py-4">
+
+            {/* Stato Politico */}
+            <SectionHeader sigil="§" label="Stato Politico" />
+            <div className="flex flex-wrap gap-2 mb-1">
+              <span className={`px-2 py-1 border text-xs font-serif ${
+                currentState.isExiled
+                  ? 'bg-earth-orange/20 text-earth-orange border-earth-orange/40'
+                  : 'bg-parchment-mid text-ink border-parchment-deep'
+              }`}>
+                {currentState.isExiled ? 'Esiliato' : currentState.currentStatusLabel}
+              </span>
+              <span className="px-2 py-1 border border-parchment-deep text-xs font-serif bg-parchment-mid text-ink">
+                {currentState.currentFactionLabel}
+              </span>
+              {currentState.isMagnate && (
+                <span className="px-2 py-1 border border-rubric/40 text-xs font-serif text-rubric">
+                  Magnate
+                </span>
+              )}
+            </div>
+
+            <hr className="border-t border-parchment-deep my-4" />
+
+            {/* Origini */}
+            <SectionHeader sigil="¶" label="Origini e Luoghi" />
+            <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm font-serif mb-1">
+              <div>
+                <span className="block text-ink-faded text-[10px] italic font-label">
+                  {currentYear < 1343 ? 'Sesto' : 'Quartiere'}
+                </span>
+                <span className="text-ink text-[13px]">
+                  {getFamilyDistrict(selectedFamily, currentYear)}
+                </span>
+              </div>
+              <div>
+                <span className="block text-ink-faded text-[10px] italic font-label">Coordinate</span>
+                <span className="text-ink text-[13px]">
+                  {selectedFamily.coordinates ? 'Mappato' : 'Non mappato'}
+                </span>
+              </div>
+              {selectedFamily.originalFaction && (
+                <div>
+                  <span className="block text-ink-faded text-[10px] italic font-label">Fazione orig.</span>
+                  <span className="text-ink text-[13px]">{selectedFamily.originalFaction}</span>
+                </div>
+              )}
+              {selectedFamily.originalStatus && (
+                <div>
+                  <span className="block text-ink-faded text-[10px] italic font-label">Classe orig.</span>
+                  <span className="text-ink text-[13px]">{selectedFamily.originalStatus}</span>
+                </div>
+              )}
+            </div>
+
+            {/* Persone Notevoli */}
+            {selectedFamily.noticeablePeople && (
+              <>
+                <hr className="border-t border-parchment-deep my-4" />
+                <SectionHeader sigil="✦" label="Persone Notevoli" />
+                <p className="text-sm font-serif text-ink leading-relaxed">
+                  {selectedFamily.noticeablePeople}
+                </p>
+              </>
+            )}
+
+            {/* Economia */}
             {(selectedFamily.occupation || selectedFamily.propertyType) && (
-              <div className="border-t border-ink/10 pt-4">
-                <h3 className="text-[10px] font-sans font-bold uppercase tracking-widest text-ink-light mb-1">
-                  Economy
-                </h3>
+              <>
+                <hr className="border-t border-parchment-deep my-4" />
+                <SectionHeader sigil="¶" label="Economia" />
                 {selectedFamily.occupation && (
                   <p className="text-sm font-serif text-ink mb-1">
-                    <span className="italic text-ink-light">Occupation:</span>{' '}
+                    <span className="italic text-ink-faded">Occupazione: </span>
                     {selectedFamily.occupation}
                   </p>
                 )}
                 {selectedFamily.propertyType && (
                   <p className="text-sm font-serif text-ink">
-                    <span className="italic text-ink-light">Property:</span>{' '}
+                    <span className="italic text-ink-faded">Proprietà: </span>
                     {selectedFamily.propertyType}
                   </p>
                 )}
-              </div>
+              </>
             )}
 
-            {(selectedFamily.originalSourceTerm ||
-              selectedFamily.sourceCitation) && (
-              <div className="border-t border-ink/10 pt-4">
-                <h3 className="text-[10px] font-sans font-bold uppercase tracking-widest text-ink-light mb-1">
-                  Sources
-                </h3>
-                <p className="text-xs font-serif text-ink-light italic">
-                  {selectedFamily.originalSourceTerm}
-                </p>
-                {selectedFamily.sourceCitation && (
-                  <p className="text-[10px] text-ink-light mt-1">
-                    Ref: {selectedFamily.sourceCitation}
+            {/* Fonti */}
+            {(selectedFamily.originalSourceTerm || selectedFamily.sourceCitation) && (
+              <>
+                <hr className="border-t border-parchment-deep my-4" />
+                <SectionHeader sigil="§" label="Fonti" />
+                {selectedFamily.originalSourceTerm && (
+                  <p className="text-xs font-serif text-ink-faded italic mb-1">
+                    {selectedFamily.originalSourceTerm}
                   </p>
                 )}
-              </div>
+                {selectedFamily.sourceCitation && (
+                  <p className="text-[10px] font-label text-ink-faded tracking-wide">
+                    Rif: {selectedFamily.sourceCitation}
+                  </p>
+                )}
+              </>
             )}
+
           </div>
-        </div>
+
+          {/* Non-scrolling close button */}
+          <button
+            onClick={onClose}
+            className="shrink-0 mx-4 mb-4 mt-2 h-12 border border-rubric/40 bg-transparent font-label text-[9px] tracking-[0.3em] text-rubric"
+            style={{ borderRadius: 0, width: 'calc(100% - 2rem)' }}
+          >
+            ✕  CHIUDI
+          </button>
+        </>
       )}
     </div>
   );

@@ -2,6 +2,7 @@ import React from 'react';
 import { Family, HistoricalEvent } from '../../../types';
 import HistoricalMap from '../HistoricalMap';
 import { TimelinePanel } from '../../../components/panels/TimelinePanel';
+import { MobileFactionGrid } from '../components/MobileFactionGrid';
 
 interface SocialMapViewProps {
   data: Family[];
@@ -12,6 +13,7 @@ interface SocialMapViewProps {
   setIsPlaying: (playing: boolean) => void;
   activeEvent: HistoricalEvent | undefined;
   onOpenChronicle: () => void;
+  onZoomReady?: (zoomIn: () => void, zoomOut: () => void, resetZoom: () => void) => void;
 }
 
 export const SocialMapView: React.FC<SocialMapViewProps> = ({
@@ -23,25 +25,41 @@ export const SocialMapView: React.FC<SocialMapViewProps> = ({
   setIsPlaying,
   activeEvent,
   onOpenChronicle,
+  onZoomReady,
 }) => {
   return (
     <div className="flex-1 relative h-full flex flex-col sm:flex-row">
-      <div className="flex-1 relative min-h-0">
+
+      {/* Mobile: scrollable HTML grid — hidden on desktop */}
+      <MobileFactionGrid
+        data={data}
+        year={currentYear}
+        onSelectFamily={(f) => onSelectFamily(f)}
+        selectedFamilyId={selectedFamily?.id}
+      />
+
+      {/* Desktop: pan/zoom SVG canvas — hidden on mobile */}
+      <div className="hidden sm:flex flex-1 relative min-h-0">
         <HistoricalMap
           data={data}
           year={currentYear}
           onSelectFamily={onSelectFamily}
           selectedFamilyId={selectedFamily?.id}
+          onZoomReady={onZoomReady}
         />
       </div>
 
-      <TimelinePanel
-        currentYear={currentYear}
-        isPlaying={isPlaying}
-        onTogglePlay={() => setIsPlaying(!isPlaying)}
-        activeEvent={activeEvent}
-        onOpenChronicle={onOpenChronicle}
-      />
+      {/* Timeline panel — hidden on mobile */}
+      <div className="hidden sm:flex">
+        <TimelinePanel
+          currentYear={currentYear}
+          isPlaying={isPlaying}
+          onTogglePlay={() => setIsPlaying(!isPlaying)}
+          activeEvent={activeEvent}
+          onOpenChronicle={onOpenChronicle}
+        />
+      </div>
+
     </div>
   );
 };

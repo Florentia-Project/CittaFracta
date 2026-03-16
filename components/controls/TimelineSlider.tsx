@@ -1,12 +1,15 @@
 import React from 'react';
 import { HistoricalEvent } from '../../types';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Maximize } from 'lucide-react';
 
 interface TimelineSliderProps {
   currentYear: number;
   setCurrentYear: (year: number) => void;
   events: HistoricalEvent[];
   jumpToEvent: (direction: 'prev' | 'next') => void;
+  onZoomIn?: () => void;
+  onZoomOut?: () => void;
+  onResetZoom?: () => void;
 }
 
 export const TimelineSlider: React.FC<TimelineSliderProps> = ({
@@ -14,10 +17,41 @@ export const TimelineSlider: React.FC<TimelineSliderProps> = ({
   setCurrentYear,
   events,
   jumpToEvent,
+  onZoomIn,
+  onZoomOut,
+  onResetZoom,
 }) => {
   return (
     <div className="bg-parchment pb-4 sm:pb-6 pt-2 px-4 sm:px-12 shrink-0 z-30 relative">
-      <div className="max-w-6xl mx-auto w-full relative flex items-center gap-8">
+      <div className="max-w-6xl mx-auto w-full relative flex items-center gap-4 sm:gap-8">
+
+        {/* Zoom controls — left of track */}
+        {(onZoomIn || onZoomOut || onResetZoom) && (
+          <div className="flex items-center gap-1 shrink-0">
+            <button
+              onClick={onZoomIn}
+              title="Zoom in"
+              className="text-ink-light hover:text-ink flex items-center justify-center w-7 h-7 rounded-full border border-ink/20 hover:bg-ink/5 transition-colors"
+            >
+              <ZoomIn size={12} />
+            </button>
+            <button
+              onClick={onZoomOut}
+              title="Zoom out"
+              className="text-ink-light hover:text-ink flex items-center justify-center w-7 h-7 rounded-full border border-ink/20 hover:bg-ink/5 transition-colors"
+            >
+              <ZoomOut size={12} />
+            </button>
+            <button
+              onClick={onResetZoom}
+              title="Reset view"
+              className="text-ink-light hover:text-ink flex items-center justify-center w-7 h-7 rounded-full border border-ink/20 hover:bg-ink/5 transition-colors"
+            >
+              <Maximize size={12} />
+            </button>
+          </div>
+        )}
+
         <div className="relative h-12 flex items-center flex-1">
           <div className="absolute w-full h-[1px] bg-ink/30"></div>
           {events

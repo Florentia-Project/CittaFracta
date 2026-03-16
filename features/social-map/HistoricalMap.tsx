@@ -1,8 +1,7 @@
 
-import React, { useMemo, useState, useRef, useLayoutEffect } from 'react';
+import React, { useMemo, useState, useRef, useLayoutEffect, useCallback, useEffect } from 'react';
 import { Family } from '../../types';
 import { calculateFamilyState } from './logic/engine';
-import { ZoomIn, ZoomOut, Maximize } from 'lucide-react';
 import { normalizeAssetPath } from '../../utils/assetPaths';
 import { deduplicateFamiliesByName } from './utils/deduplicateFamilies';
 
@@ -11,9 +10,10 @@ interface HistoricalMapProps {
   year: number;
   onSelectFamily: (family: Family) => void;
   selectedFamilyId?: string;
+  onZoomReady?: (zoomIn: () => void, zoomOut: () => void, resetZoom: () => void) => void;
 }
 
-const HistoricalMap: React.FC<HistoricalMapProps> = ({ data, year, onSelectFamily, selectedFamilyId }) => {
+const HistoricalMap: React.FC<HistoricalMapProps> = ({ data, year, onSelectFamily, selectedFamilyId, onZoomReady }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   
   // Dimensions of the viewport
@@ -358,17 +358,35 @@ const HistoricalMap: React.FC<HistoricalMapProps> = ({ data, year, onSelectFamil
   };
 
   // --- ZOOM CONTROL HELPERS ---
-  const applyZoom = (factor: number) => {
-      const center = { x: dimensions.width / 2, y: dimensions.height / 2 };
-      const newK = Math.max(0.5, Math.min(20, transform.k * factor));
-      const newX = center.x - (center.x - transform.x) * (newK / transform.k);
-      const newY = center.y - (center.y - transform.y) * (newK / transform.k);
+  // Use refs so the stable callbacks always read the latest transform/dimensions
+  const transformRef = useRef(transform);
+  useEffect(() => { transformRef.current = transform; }, [transform]);
+  const dimensionsRef = useRef(dimensions);
+  useEffect(() => { dimensionsRef.current = dimensions; }, [dimensions]);
+
+  const applyZoom = useCallback((factor: number) => {
+      const t = transformRef.current;
+      const d = dimensionsRef.current;
+      const center = { x: d.width / 2, y: d.height / 2 };
+      const newK = Math.max(0.5, Math.min(20, t.k * factor));
+      const newX = center.x - (center.x - t.x) * (newK / t.k);
+      const newY = center.y - (center.y - t.y) * (newK / t.k);
       setTransform({ k: newK, x: newX, y: newY });
-  };
-  const resetZoom = () => {
-    // Re-trigger initial layout logic by toggling init state or just manual reset
-    setInitialized(false); // Quick way to re-center
-  };
+  }, []);
+
+  const resetZoom = useCallback(() => {
+      setInitialized(false);
+  }, []);
+
+  // Expose zoom controls to the parent once stable functions are ready
+  useEffect(() => {
+      onZoomReady?.(
+          () => applyZoom(1.2),
+          () => applyZoom(1 / 1.2),
+          resetZoom,
+      );
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [onZoomReady]);
 
   // --- STICKY / INFINITE CALCULATIONS ---
   
@@ -389,13 +407,6 @@ const HistoricalMap: React.FC<HistoricalMapProps> = ({ data, year, onSelectFamil
   return (
     <div className="flex-1 w-full h-full relative p-0 select-none bg-parchment overflow-hidden" ref={containerRef}>
       
-      {/* Controls */}
-      <div className="absolute bottom-4 right-4 z-50 flex flex-col gap-2">
-        <button onClick={() => applyZoom(1.2)} className="bg-parchment-dark border border-ink/20 p-2 rounded shadow hover:bg-white"><ZoomIn size={16}/></button>
-        <button onClick={() => applyZoom(1/1.2)} className="bg-parchment-dark border border-ink/20 p-2 rounded shadow hover:bg-white"><ZoomOut size={16}/></button>
-        <button onClick={resetZoom} className="bg-parchment-dark border border-ink/20 p-2 rounded shadow hover:bg-white"><Maximize size={16}/></button>
-      </div>
-
       <div
         className={`w-full h-full ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
         style={{ touchAction: 'none' }}

@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import { Eye, EyeOff, MapIcon, Layers } from 'lucide-react';
 import { BASE_MAPS } from '../utils/constants';
 import { Section } from './Section';

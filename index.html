@@ -6,7 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Florentine Factions Research Tool</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Primary fonts (Modern mode) -->
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500&family=MedievalSharp&display=swap" rel="stylesheet">
+    <!-- Additional fonts for Scriptorio historical mode -->
+    <link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
     <script>
       tailwind.config = {
         theme: {
@@ -15,17 +18,24 @@
               sans: ['Inter', 'sans-serif'],
               serif: ['Cormorant Garamond', 'serif'],
               display: ['Cinzel', 'serif'],
+              label: ['Cinzel', 'serif'],
+              body: ['Crimson Pro', 'serif'],
               medieval: ['MedievalSharp', 'cursive'],
             },
             colors: {
               // Exact matches from reference style (Languages map & Timeline)
               'parchment': '#F3EDE2', // The main background beige
+              'parchment-mid': '#EDE0BF', // Panel dividers
               'parchment-dark': '#E6DCCF', // Slightly darker for headers/cards
+              'parchment-deep': '#D9C9A3', // Ruled line color, borders
               'ink': '#332D28', // The primary dark text color (Charcoal brown)
               'ink-light': '#6B665F', // Muted text
+              'ink-faded': '#5C4033', // Iron gall brown — secondary/disabled text
               'earth-brown': '#8B5E3C', // Timeline accents
               'earth-orange': '#C17C59', // Accent for highlights
               'earth-green': '#7D8471', // Muted green accent
+              'rubric': '#8B1A1A', // Rubrication red — headings, active states
+              'rubric-light': '#C0392B', // Brighter red — hover states
             }
           }
         }
@@ -45,7 +55,7 @@
   html, body, #root {
     height: 100%;
     margin: 0;
-    overflow: hidden; 
+    overflow: hidden;
   }
   /* Grainy texture overlay to simulate paper */
   .paper-texture {

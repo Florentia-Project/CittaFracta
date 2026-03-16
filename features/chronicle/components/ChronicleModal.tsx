@@ -12,11 +12,81 @@ const ChronicleModal: React.FC<ChronicleModalProps> = ({ event, onClose }) => {
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
 
   if (!event) return null;
-  
+
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 640;
+
   const toggleSource = (idx: number) => {
       setExpandedIndex(expandedIndex === idx ? null : idx);
   };
 
+  // ── Mobile: full-screen folio ──────────────────────────────────────────────
+  if (isMobile) {
+    return (
+      <div className="fixed inset-0 z-[200] bg-parchment flex flex-col">
+
+        {/* Header */}
+        <div className="h-11 flex items-center justify-between px-4 border-b border-parchment-deep shrink-0">
+          <button
+            onClick={onClose}
+            className="font-label text-[9px] tracking-wide text-rubric min-h-[44px] flex items-center"
+            style={{ borderRadius: 0 }}
+          >
+            ← TORNA
+          </button>
+          <span className="font-label text-[8px] tracking-[0.3em] text-ink-faded">CRONACA</span>
+          <div className="w-16" />
+        </div>
+
+        {/* Body */}
+        <div className="flex-1 overflow-y-auto px-6 py-6">
+
+          {/* Year */}
+          <p className="font-display text-4xl text-ink leading-none pb-2 mb-6 border-b border-rubric/40 inline-block">
+            {event.year}
+          </p>
+
+          {/* Title */}
+          <h2 className="font-display text-xl text-ink leading-tight mb-4">
+            {event.title}
+          </h2>
+
+          {/* THE DROP CAP — most important detail in the entire app */}
+          <div className="font-serif text-base text-ink leading-[1.8]">
+            <span
+              className="text-rubric float-left leading-none mr-3 mb-1 select-none"
+              style={{ fontFamily: "'IM Fell English', serif", fontSize: '72px', lineHeight: 0.85 }}
+              aria-hidden="true"
+            >
+              {event.fullDescription.charAt(0)}
+            </span>
+            {event.fullDescription.slice(1)}
+          </div>
+
+          {/* Sources */}
+          {event.sources && event.sources.length > 0 && (
+            <div className="mt-10 pt-6 border-t border-parchment-deep clear-both">
+              <p className="font-label text-[8px] tracking-[0.3em] text-ink-faded mb-3">§ FONTI STORICHE</p>
+              <ul className="space-y-3">
+                {event.sources.map((source, idx) => (
+                  <li key={idx} className="font-serif text-sm italic text-ink-faded">
+                    {source.title}
+                    {source.quote && (
+                      <p className="mt-1 pl-3 border-l-2 border-rubric/30 text-ink/70 not-italic text-xs leading-relaxed">
+                        "{source.quote}"
+                      </p>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+        </div>
+      </div>
+    );
+  }
+
+  // ── Desktop: existing modal (unchanged) ───────────────────────────────────
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-500">
       

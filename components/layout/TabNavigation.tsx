@@ -8,7 +8,7 @@ interface TabNavigationProps {
 
 export const TabNavigation: React.FC<TabNavigationProps> = ({ activeTab, setActiveTab }) => {
   return (
-    <div className="flex gap-6 text-[10px] font-sans font-bold tracking-widest uppercase mb-2">
+    <div className="hidden sm:flex gap-6 text-[10px] font-sans font-bold tracking-widest uppercase mb-2">
       <button
         onClick={() => setActiveTab('map')}
         className={`flex items-center gap-2 transition-all pb-1 border-b ${

@@ -2,7 +2,7 @@ import React from 'react';
 
 export const Header: React.FC = () => {
   return (
-    <div className="pb-2">
+    <div className="hidden sm:block pb-2">
       <h1 className="text-2xl font-display font-bold tracking-[0.15em] uppercase text-ink">
         Florentine Factions
       </h1>
