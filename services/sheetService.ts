@@ -70,50 +70,69 @@ export const fetchFamiliesFromSheet = async (): Promise<Family[]> => {
             const timeline = timelineMap.get(parentId) || {};
             const relationships = relMap.get(String(id)) || [];
 
-            const getInt = (val: string) => val && !isNaN(parseInt(val)) ? parseInt(val) : undefined;
-            const getFloat = (val: string) => val && !isNaN(parseFloat(val)) ? parseFloat(val) : undefined;
-            const getBool = (val: string) => val && ['true', '1', 'yes'].includes(String(val).toLowerCase().trim());
-            const getStr = (...keys: string[]) => { for (const k of keys) { if (row[k]) return row[k]; } return undefined; };
+            const getInt = (val: string | undefined) => val && !isNaN(parseInt(val)) ? parseInt(val) : undefined;
+            const getFloat = (val: string | undefined) => val && !isNaN(parseFloat(val)) ? parseFloat(val) : undefined;
+            const getBool = (val: string | undefined) => !!val && ['true', '1', 'yes'].includes(String(val).toLowerCase().trim());
+
+            // Check TIMELINE sheet first (faction/status data lives there),
+            // then fall back to FAMILIES sheet. Both have already been normalizeKey'd.
+            const getField = (...keys: string[]): string | undefined => {
+                for (const k of keys) {
+                    if (timeline[k] && String(timeline[k]).trim() !== '') return String(timeline[k]).trim();
+                }
+                for (const k of keys) {
+                    if (row[k] && String(row[k]).trim() !== '') return String(row[k]).trim();
+                }
+                return undefined;
+            };
+
+            // FAMILIES sheet only (geographic / identity fields)
+            const fromFamilies = (...keys: string[]): string | undefined => {
+                for (const k of keys) {
+                    if (row[k] && String(row[k]).trim() !== '') return String(row[k]).trim();
+                }
+                return undefined;
+            };
 
             return {
                 id: String(id),
-                name: getStr('name', 'familyname'),
-                sesto: row['sesto'],
-                manualQuartiere: row['quartiere'],
-                mapRef: getInt(row['mapref']),
+                name: fromFamilies('name', 'familyname'),
+                sesto: fromFamilies('sesto'),
+                manualQuartiere: fromFamilies('quartiere'),
+                mapRef: getInt(fromFamilies('mapref')),
                 coordinates: (row['lat'] && row['lng']) ? {
                     x: getFloat(row['lat']),
                     y: getFloat(row['lng'])
                 } : undefined,
-                yearStart: getInt(row['yearstart']),
-                yearEnd: getInt(row['yearend']),
-                coatOfArmsUrl: normalizeAssetPath(row['imageurl']),
+                yearStart: getInt(fromFamilies('yearstart')),
+                yearEnd: getInt(fromFamilies('yearend')),
+                coatOfArmsUrl: normalizeAssetPath(fromFamilies('imageurl') ?? ''),
 
-                // Faction timeline
-                faction1Type: getStr('faction1type', 'faction1', 'faction'),
-                faction1Year: getInt(getStr('faction1year', 'factionyear') ?? ''),
-                faction2Type: getStr('faction2type', 'faction2'),
-                faction2Year: getInt(row['faction2year'] ?? ''),
-                subFaction: getStr('subfaction', 'sub'),
+                // Faction timeline — reads from TIMELINE sheet first
+                faction1Type:  getField('faction1type', 'faction1', 'faction'),
+                faction1Year:  getInt(getField('faction1year', 'factionyear')),
+                faction2Type:  getField('faction2type', 'faction2'),
+                faction2Year:  getInt(getField('faction2year')),
+                subFaction:    getField('subfaction', 'sub', 'subfactiontype'),
 
-                // Social class timeline
-                status1Class: getStr('status1class', 'status1', 'class', 'status'),
-                status2Class: getStr('status2class', 'status2'),
-                status2Year: getInt(row['status2year'] ?? ''),
+                // Social class — reads from TIMELINE sheet first
+                status1Class:  getField('status1class', 'status1', 'class', 'status', 'socialclass'),
+                status2Class:  getField('status2class', 'status2'),
+                status2Year:   getInt(getField('status2year')),
 
-                // Flags
-                isMagnate: getBool(getStr('ismagnate', 'magnate') ?? ''),
+                // Flags — reads from TIMELINE sheet first
+                isMagnate: getBool(getField('ismagnate', 'magnate')),
 
                 // Display metadata
-                originalFaction: getStr('originalfaction') || timeline['1216faction'] || undefined,
-                originalStatus: getStr('originalstatus'),
-                noticeablePeople: getStr('noticeablepeople', 'notablepeople', 'people'),
-                occupation: row['occupation'],
-                propertyType: getStr('propertytype', 'property'),
-                originalSourceTerm: getStr('originalsourceterm', 'sourceterm'),
-                sourceCitation: getStr('sourcecitation', 'citation', 'source'),
-                description: row['description'],
-                guild: getStr('guild', 'guildtype'),
+                originalFaction:    getField('originalfaction'),
+                originalStatus:     getField('originalstatus'),
+                noticeablePeople:   getField('noticeablepeople', 'notablepeople', 'people'),
+                occupation:         getField('occupation'),
+                propertyType:       getField('propertytype', 'property'),
+                originalSourceTerm: getField('originalsourceterm', 'sourceterm'),
+                sourceCitation:     getField('sourcecitation', 'citation', 'source'),
+                description:        getField('description'),
+                guild:              getField('guild', 'guildtype'),
 
                 relationships: relationships
             } as Family;
