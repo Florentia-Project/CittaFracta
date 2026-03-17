@@ -69,127 +69,219 @@ path.district-glow {
     transition: none !important;
 }
 
-/* ============================================================
+/* ═══════════════════════════════════════════════════════════════
  * SCRIPTORIO MODE — "Scriptorium Obscurum"
- * Toggled by adding .historical-mode class to the root element.
- * These styles OVERLAY the default Modern design.
- * ============================================================ */
+ * A full medieval Florentine manuscript transformation.
+ * Toggled by adding .historical-mode to the root element.
+ * Rules: NEVER change layout properties. Only visual styling.
+ * ═══════════════════════════════════════════════════════════════ */
 
-/* Base parchment — aged, richer */
+/* ── LAYER 1: Base parchment — deeply aged vellum with ruling lines and ink stains ── */
 .historical-mode {
-  background-color: #D4B896;
+  background-color: #BFA07A;
   background-image:
+    /* Ink-stain patches — organic aging, not uniform */
+    radial-gradient(ellipse 70% 50% at 12% 18%, rgba(80, 42, 8, 0.18) 0%, transparent 65%),
+    radial-gradient(ellipse 55% 40% at 88% 85%, rgba(70, 35, 6, 0.15) 0%, transparent 60%),
+    radial-gradient(ellipse 35% 25% at 65% 10%, rgba(90, 50, 12, 0.10) 0%, transparent 55%),
+    radial-gradient(ellipse 45% 30% at 30% 92%, rgba(60, 30, 5, 0.12) 0%, transparent 60%),
+    /* Scribe ruling lines — visible horizontal guides, as on actual vellum */
     repeating-linear-gradient(
       0deg,
       transparent,
-      transparent 27px,
-      rgba(139, 100, 60, 0.12) 27px,
-      rgba(139, 100, 60, 0.12) 28px
+      transparent 26px,
+      rgba(100, 58, 14, 0.22) 26px,
+      rgba(100, 58, 14, 0.22) 27.5px
     ),
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    /* Organic grain — fractal noise */
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='500' height='500'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.72' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='500' height='500' filter='url(%23n)' opacity='0.055'/%3E%3C/svg%3E");
+  font-family: 'IM Fell English', Georgia, serif !important;
+  color: #1C1008 !important;
 }
 
-/*
- * Parchment aging texture overlay — "Velo dell'Oblio"
- */
+/* ── LAYER 2: Vignette — dark, handled page edges (the single biggest impact change) ── */
+/* Simulates a manuscript page that has been held, turned, and aged at the margins.    */
 .historical-mode::before {
   content: '';
   position: fixed;
   inset: 0;
-  background: url('/CittaFracta/assets/textures/parchment-preview.png') repeat;
-  opacity: 0.4;
+  background:
+    /* Corner vignette — the primary aging effect */
+    radial-gradient(ellipse 130% 105% at 50% 50%,
+      transparent 38%,
+      rgba(45, 20, 4, 0.28) 65%,
+      rgba(35, 14, 2, 0.52) 100%
+    ),
+    /* Top spine shadow — left edge of an open folio */
+    linear-gradient(90deg, rgba(45, 20, 4, 0.22) 0%, transparent 12%),
+    /* Top edge aging — where the page was thumbed */
+    linear-gradient(180deg, rgba(45, 20, 4, 0.20) 0%, transparent 14%),
+    /* Bottom edge darkening */
+    linear-gradient(0deg, rgba(35, 14, 2, 0.16) 0%, transparent 10%),
+    /* Parchment grain tile */
+    url('/CittaFracta/assets/textures/parchment-preview.png') repeat;
+  background-size: 100%, 100%, 100%, 100%, 400px 400px;
   pointer-events: none;
   z-index: 0;
 }
 
-/* Typography — manuscript fonts */
-.historical-mode {
-  font-family: 'IM Fell English', Georgia, serif !important;
+/* ── LAYER 3: Gold-leaf accent at the page frame border ── */
+/* Appears as a thin illuminated line — typical of luxury Florentine manuscripts. */
+.historical-mode::after {
+  content: '';
+  position: fixed;
+  inset: 6px;
+  border: 1.5px solid rgba(184, 146, 10, 0.35);
+  box-shadow:
+    inset 0 0 0 3px rgba(184, 146, 10, 0.12),
+    0 0 0 1.5px rgba(107, 20, 20, 0.20);
+  pointer-events: none;
+  z-index: 1;
 }
 
+/* ── TYPOGRAPHY — iron gall ink depth throughout ── */
 .historical-mode h1,
 .historical-mode .font-display,
 .historical-mode [class*="font-display"] {
   font-family: 'IM Fell English', Georgia, serif !important;
-  color: #1A0D05;
-  text-shadow: 1px 1px 0 rgba(139,100,60,0.3);
-  letter-spacing: 0.08em;
+  color: #1C1008 !important;
+  text-shadow:
+    1px 1px 0 rgba(90, 50, 10, 0.45),
+    2px 2px 4px rgba(28, 14, 2, 0.20),
+    0 0 30px rgba(184, 146, 10, 0.08);
+  letter-spacing: 0.10em;
 }
 
 .historical-mode h2,
-.historical-mode h3 {
+.historical-mode h3,
+.historical-mode [class*="font-label"] {
   font-family: 'Cinzel', serif !important;
-  color: #8B1A1A !important;
+  color: #6B1414 !important;
+  letter-spacing: 0.22em !important;
+  text-shadow: 0.5px 0.5px 0 rgba(184, 146, 10, 0.25) !important;
 }
 
-/* Header — manuscript title page treatment */
+/* ── HEADER — rubricated manuscript title page ── */
 .historical-mode header {
-  border-bottom: 2px solid #6B1414 !important;
-  background-color: #C9A87C !important;
-  box-shadow: 0 2px 8px rgba(26, 13, 5, 0.15);
+  background-color: #C4A070 !important;
+  border-bottom: 2.5px solid #6B1414 !important;
+  box-shadow:
+    0 3px 0 rgba(184, 146, 10, 0.40),
+    0 5px 16px rgba(28, 14, 2, 0.18) !important;
 }
 
-/* Panels — aged folio treatment */
-.historical-mode aside {
-  background-color: #CEAD85 !important;
-  border-left: 3px solid #6B1414 !important;
-  box-shadow: inset -2px 0 8px rgba(26,13,5,0.08);
-}
-
-/* Sidebars and detail panels */
+/* ── PANELS & SIDEBARS — aged folio pages ── */
 .historical-mode [class*="bg-parchment"] {
-  background-color: #CEAD85 !important;
+  background-color: #C9A87C !important;
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 26px,
+      rgba(100, 58, 14, 0.12) 26px,
+      rgba(100, 58, 14, 0.12) 27px
+    ) !important;
 }
 
-/* Map — aged cartographic treatment */
+.historical-mode aside {
+  background-color: #C4A070 !important;
+  border-left: 3px solid #6B1414 !important;
+  box-shadow: inset -3px 0 12px rgba(28, 14, 2, 0.12), -1px 0 6px rgba(28, 14, 2, 0.08) !important;
+}
+
+/* ── LEAFLET MAP — parchment cartography (deep sepia + aging) ── */
 .historical-mode .leaflet-container {
-  filter: sepia(45%) contrast(90%) brightness(95%) saturate(80%);
+  filter: sepia(65%) contrast(88%) brightness(90%) saturate(70%) hue-rotate(-8deg) !important;
 }
 
-/* Timeline — chronicle scroll style */
+/* ── SOCIAL MAP SVG — aged faction register ── */
+/* Gives the entire SVG matrix the feel of an inked manuscript diagram */
+.historical-mode svg:not(.ornament) {
+  filter: sepia(35%) contrast(97%) brightness(96%) saturate(85%);
+}
+
+/* Family name boxes — aged parchment fill over the default #F3EDE2 */
+.historical-mode svg rect:not([fill="none"]):not([fill="transparent"]) {
+  fill: #D4B080 !important;
+}
+
+/* ── TIMELINE — chronicle scroll bar ── */
 .historical-mode [class*="timeline"],
 .historical-mode [class*="slider"] {
-  border-top: 2px solid #6B1414;
-  background-color: #C9A87C;
+  background-color: #C4A070 !important;
+  border-top: 2.5px solid #6B1414 !important;
+  box-shadow: 0 -3px 0 rgba(184, 146, 10, 0.30), 0 -5px 14px rgba(28, 14, 2, 0.14) !important;
 }
 
-/* Year display — centerpiece */
+/* ── YEAR DISPLAY — illuminated numeral, centerpiece of the folio ── */
 .historical-mode .year-display {
-  color: #1A0D05;
+  color: #1C1008 !important;
   font-family: 'IM Fell English', Georgia, serif !important;
   text-shadow:
-    2px 2px 0 rgba(139,100,60,0.4),
-    0 0 20px rgba(184, 150, 12, 0.1);
+    2px 2px 0 rgba(90, 50, 10, 0.50),
+    0 0 25px rgba(184, 146, 10, 0.18),
+    0 0 50px rgba(184, 146, 10, 0.06) !important;
 }
 
-/* Coat of arms — illuminated frame */
-.historical-mode img[class*="coat"],
-.historical-mode img[class*="arms"],
-.historical-mode img[class*="crest"] {
-  border: 2px solid #B8960C;
-  box-shadow: 0 0 0 1px #6B1414, 2px 2px 8px rgba(26,13,5,0.3);
-  background: #EDD68A;
-}
-
-/* Section labels — rubric style */
+/* ── SECTION LABELS — rubricated annotations ── */
 .historical-mode .faction-label,
 .historical-mode [class*="label"] {
-  color: #6B1414;
-  letter-spacing: 0.2em;
-  font-weight: 600;
+  color: #6B1414 !important;
+  letter-spacing: 0.22em !important;
+  font-weight: 600 !important;
+  text-shadow: 0.5px 0.5px 0 rgba(184, 146, 10, 0.20) !important;
 }
 
-/* Chronicle panel — scroll-like */
+/* ── COAT OF ARMS — illuminated miniature frame ── */
+.historical-mode img {
+  border: 1.5px solid rgba(184, 146, 10, 0.50) !important;
+  box-shadow:
+    0 0 0 1px rgba(107, 20, 20, 0.30),
+    2px 3px 10px rgba(28, 14, 2, 0.28),
+    inset 0 0 4px rgba(184, 146, 10, 0.08) !important;
+  background: #EDD68A !important;
+}
+
+/* ── CHRONICLE MODAL — scroll folio ── */
 .historical-mode [class*="chronicle"] {
-  background-color: #CEAD85 !important;
-  border: 1px solid #6B1414 !important;
+  background-color: #C9A87C !important;
+  border: 1.5px solid #6B1414 !important;
   border-radius: 0 !important;
 }
 
-/* Ruling line on family cards */
+/* ── BORDERS — aged document rules ── */
+.historical-mode [class*="border-parchment"] {
+  border-color: #8B5C28 !important;
+}
+
+/* ── NAVIGATION / DOCK — folio spine treatment ── */
+.historical-mode nav {
+  background-color: #C4A070 !important;
+  border-color: #6B1414 !important;
+  box-shadow: 0 -2px 0 rgba(184, 146, 10, 0.30) !important;
+}
+
+/* ── REGISTER ROWS — ledger line ruling ── */
 .historical-mode tr,
 .historical-mode .family-card {
-  border-bottom: 1px solid rgba(139, 100, 60, 0.2);
+  border-bottom: 1px solid rgba(107, 20, 20, 0.18) !important;
+}
+
+/* ── BUTTON HOVER — wax seal press effect ── */
+.historical-mode button:not(.touch-exempt):hover {
+  border-color: rgba(107, 20, 20, 0.60) !important;
+  color: #6B1414 !important;
+}
+
+/* ── INPUT / RANGE TRACK — parchment scroll groove ── */
+.historical-mode input[type="range"] {
+  accent-color: #6B1414;
+}
+
+/* ── MOBILE: folio header + codex dock ── */
+.historical-mode .sm\:hidden {
+  background-color: #C4A070 !important;
+  border-color: #6B1414 !important;
 }
 
 /* ═══════════════════════════════════════
