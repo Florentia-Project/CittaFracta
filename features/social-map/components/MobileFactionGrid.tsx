@@ -172,21 +172,21 @@ export const MobileFactionGrid: React.FC<MobileFactionGridProps> = ({
       </div>
 
       <ClassSection
-        label="NOBLES"
+        label="GRANDI"
         ghib={grouped.grandi.ghib}
         guelf={grouped.grandi.guelf}
         selectedFamilyId={selectedFamilyId}
         onSelectFamily={onSelectFamily}
       />
       <ClassSection
-        label="MERCHANT ELITE"
+        label="GRASSI"
         ghib={grouped.grassi.ghib}
         guelf={grouped.grassi.guelf}
         selectedFamilyId={selectedFamilyId}
         onSelectFamily={onSelectFamily}
       />
       <ClassSection
-        label="PEOPLE"
+        label="POPOLO"
         ghib={grouped.popolo.ghib}
         guelf={grouped.popolo.guelf}
         selectedFamilyId={selectedFamilyId}
