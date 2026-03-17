@@ -467,7 +467,8 @@ const HistoricalMap: React.FC<HistoricalMapProps> = ({ data, year, onSelectFamil
                     style={{
                       transform: `translate(${vm.position.x}px, ${vm.position.y}px)`,
                       opacity: vm.isExiled ? 0.6 : 1,
-                      transition: 'transform 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.4s ease',
+                      transition: 'transform 380ms cubic-bezier(0.22, 1, 0.36, 1), opacity 300ms ease',
+                      willChange: 'transform',
                     }}
                   >
                      {/* Scale compensation for constant border widths if desired, but here we let them scale naturally for visual depth */}
