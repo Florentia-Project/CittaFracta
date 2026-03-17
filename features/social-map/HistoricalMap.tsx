@@ -457,17 +457,17 @@ const HistoricalMap: React.FC<HistoricalMapProps> = ({ data, year, onSelectFamil
                 const strokeWidth = vm.isMagnate ? 0.6 : 0.25;
 
                 return (
-                  <g 
-                    key={vm.id} 
-                    className="transition-opacity duration-300"
+                  <g
+                    key={vm.id}
                     onClick={(e) => {
                         e.stopPropagation();
                         if (hasPanned.current) return;
                         onSelectFamily(vm);
                     }}
-                    style={{ 
+                    style={{
                       transform: `translate(${vm.position.x}px, ${vm.position.y}px)`,
                       opacity: vm.isExiled ? 0.6 : 1,
+                      transition: 'transform 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.4s ease',
                     }}
                   >
                      {/* Scale compensation for constant border widths if desired, but here we let them scale naturally for visual depth */}
