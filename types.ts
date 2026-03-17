@@ -80,6 +80,10 @@ export interface Family {
   gridLocations?: string[];   
   coordinates?: { x: number; y: number }; // GPS
   
+  // -- Faction/Status Snapshots (from TIMELINE sheet) --
+  // Key = year (e.g. 1216, 1250, 1300). Value = faction + status at that year.
+  factionSnapshots?: Record<number, { faction: string; status: string }>;
+
   // -- Connections --
   relationships?: Relationship[];
 

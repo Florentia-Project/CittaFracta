@@ -61,6 +61,10 @@ export const fetchFamiliesFromSheet = async (): Promise<Family[]> => {
             relMap.get(sourceId)?.push(newRel);
         });
 
+        // The snapshot years that the TIMELINE sheet uses as column pairs:
+        // "<year>_Faction" and "<year>_Status" — normalizeKey strips the underscore.
+        const SNAPSHOT_YEARS = [1216, 1250, 1260, 1266, 1282, 1289, 1293, 1300, 1343, 1378, 1434];
+
         // איחוד נתונים
         const mergedFamilies: Family[] = familiesData.map((row: any) => {
             const id = row['id'];
@@ -73,66 +77,52 @@ export const fetchFamiliesFromSheet = async (): Promise<Family[]> => {
             const getInt = (val: string | undefined) => val && !isNaN(parseInt(val)) ? parseInt(val) : undefined;
             const getFloat = (val: string | undefined) => val && !isNaN(parseFloat(val)) ? parseFloat(val) : undefined;
             const getBool = (val: string | undefined) => !!val && ['true', '1', 'yes'].includes(String(val).toLowerCase().trim());
-
-            // Check TIMELINE sheet first (faction/status data lives there),
-            // then fall back to FAMILIES sheet. Both have already been normalizeKey'd.
-            const getField = (...keys: string[]): string | undefined => {
-                for (const k of keys) {
-                    if (timeline[k] && String(timeline[k]).trim() !== '') return String(timeline[k]).trim();
-                }
-                for (const k of keys) {
-                    if (row[k] && String(row[k]).trim() !== '') return String(row[k]).trim();
-                }
+            const fromRow = (...keys: string[]): string | undefined => {
+                for (const k of keys) { if (row[k]?.trim()) return row[k].trim(); }
+                return undefined;
+            };
+            const fromTimeline = (...keys: string[]): string | undefined => {
+                for (const k of keys) { if (timeline[k]?.trim()) return timeline[k].trim(); }
                 return undefined;
             };
 
-            // FAMILIES sheet only (geographic / identity fields)
-            const fromFamilies = (...keys: string[]): string | undefined => {
-                for (const k of keys) {
-                    if (row[k] && String(row[k]).trim() !== '') return String(row[k]).trim();
+            // --- Parse TIMELINE year-snapshot columns ---
+            // normalizeKey turns "1216_Faction" → "1216faction", "1216_Status" → "1216status"
+            const factionSnapshots: Record<number, { faction: string; status: string }> = {};
+            for (const y of SNAPSHOT_YEARS) {
+                const faction = timeline[`${y}faction`]?.trim();
+                const status  = timeline[`${y}status`]?.trim();
+                if (faction || status) {
+                    factionSnapshots[y] = { faction: faction ?? '', status: status ?? '' };
                 }
-                return undefined;
-            };
+            }
 
             return {
                 id: String(id),
-                name: fromFamilies('name', 'familyname'),
-                sesto: fromFamilies('sesto'),
-                manualQuartiere: fromFamilies('quartiere'),
-                mapRef: getInt(fromFamilies('mapref')),
+                name: fromRow('name', 'familyname'),
+                sesto: fromRow('sesto'),
+                manualQuartiere: fromRow('quartiere'),
+                mapRef: getInt(fromRow('mapref')),
                 coordinates: (row['lat'] && row['lng']) ? {
                     x: getFloat(row['lat']),
                     y: getFloat(row['lng'])
                 } : undefined,
-                yearStart: getInt(fromFamilies('yearstart')),
-                yearEnd: getInt(fromFamilies('yearend')),
-                coatOfArmsUrl: normalizeAssetPath(fromFamilies('imageurl') ?? ''),
+                yearStart: getInt(fromRow('yearstart')),
+                yearEnd: getInt(fromRow('yearend')),
+                coatOfArmsUrl: normalizeAssetPath(fromRow('imageurl') ?? ''),
 
-                // Faction timeline — reads from TIMELINE sheet first
-                faction1Type:  getField('faction1type', 'faction1', 'faction'),
-                faction1Year:  getInt(getField('faction1year', 'factionyear')),
-                faction2Type:  getField('faction2type', 'faction2'),
-                faction2Year:  getInt(getField('faction2year')),
-                subFaction:    getField('subfaction', 'sub', 'subfactiontype'),
+                // Snapshot data from TIMELINE sheet (the primary faction/status source)
+                factionSnapshots: Object.keys(factionSnapshots).length > 0 ? factionSnapshots : undefined,
 
-                // Social class — reads from TIMELINE sheet first
-                status1Class:  getField('status1class', 'status1', 'class', 'status', 'socialclass'),
-                status2Class:  getField('status2class', 'status2'),
-                status2Year:   getInt(getField('status2year')),
-
-                // Flags — reads from TIMELINE sheet first
-                isMagnate: getBool(getField('ismagnate', 'magnate')),
-
-                // Display metadata
-                originalFaction:    getField('originalfaction'),
-                originalStatus:     getField('originalstatus'),
-                noticeablePeople:   getField('noticeablepeople', 'notablepeople', 'people'),
-                occupation:         getField('occupation'),
-                propertyType:       getField('propertytype', 'property'),
-                originalSourceTerm: getField('originalsourceterm', 'sourceterm'),
-                sourceCitation:     getField('sourcecitation', 'citation', 'source'),
-                description:        getField('description'),
-                guild:              getField('guild', 'guildtype'),
+                // Display metadata (check TIMELINE then FAMILIES)
+                isMagnate:          getBool(fromTimeline('ismagnate', 'magnate') ?? fromRow('ismagnate', 'magnate')),
+                noticeablePeople:   fromTimeline('noticeablepeople', 'notablepeople', 'people') ?? fromRow('noticeablepeople', 'notablepeople'),
+                occupation:         fromTimeline('occupation') ?? fromRow('occupation'),
+                propertyType:       fromTimeline('propertytype', 'property') ?? fromRow('propertytype', 'property'),
+                originalSourceTerm: fromTimeline('originalsourceterm', 'sourceterm') ?? fromRow('originalsourceterm', 'sourceterm'),
+                sourceCitation:     fromTimeline('sourcecitation', 'citation', 'source') ?? fromRow('sourcecitation', 'citation'),
+                description:        fromTimeline('description') ?? fromRow('description'),
+                guild:              fromTimeline('guild', 'guildtype') ?? fromRow('guild', 'guildtype'),
 
                 relationships: relationships
             } as Family;

@@ -31,116 +31,113 @@ export const getGridCoordinates = (gridCode: string): { x: number; y: number } |
   };
 };
 
+// --- Normalizers ---
+// Accept the user's sheet values (case-insensitive) and map to engine-internal labels.
+
+function normalizeFaction(raw: string | undefined): { faction: string; subFaction: 'White' | 'Black' | undefined } {
+  const v = (raw ?? '').toLowerCase().trim();
+  if (v === 'white guelph' || v === 'white guelf') return { faction: 'Guelf', subFaction: 'White' };
+  if (v === 'black guelph' || v === 'black guelf') return { faction: 'Guelf', subFaction: 'Black' };
+  if (v === 'guelph' || v === 'guelf' || v === 'guelfi') return { faction: 'Guelf', subFaction: undefined };
+  if (v === 'ghibelline' || v === 'ghibellino' || v === 'ghibellini') return { faction: 'Ghibelline', subFaction: undefined };
+  return { faction: raw ?? '', subFaction: undefined };
+}
+
+function normalizeStatus(raw: string | undefined): string {
+  const v = (raw ?? '').toLowerCase().trim();
+  if (v === 'grandi' || v === 'noble' || v === 'nobles') return 'Noble';
+  if (v === 'grassi' || v === 'popolo grasso' || v === 'merchant elite') return 'Grassi';
+  if (v === 'popolo' || v === 'people') return 'Popolo';
+  return raw ?? '';
+}
+
 /**
  * The Historical Engine
  * Acts as a transformation layer between Raw Data and Visualization.
+ *
+ * Reads from factionSnapshots (TIMELINE sheet year-columns) when present.
+ * Falls back to legacy faction1Type/faction2Type fields.
  */
 export const calculateFamilyState = (family: Family, year: number): CalculatedState => {
   let isExiled = false;
-  
-  // 1. Determine Current Status (Timeline based)
-  let currentStatusLabel = family.status1Class;
-  if (family.status2Year && year >= family.status2Year && family.status2Class && family.status2Class !== 'Not in source') {
-      currentStatusLabel = family.status2Class;
-  }
-  
-  // 2. Determine Current Faction (Timeline based)
-  // Default to Faction 1
-  let currentFactionLabel = family.faction1Type;
-  if (family.faction1Year && year < family.faction1Year) {
-      // Before they officially joined? Assume neutral or use Faction 1
-      // We will stick to Faction 1 as "Origin" unless undefined
-  }
-  
-  if (family.faction2Year && year >= family.faction2Year && family.faction2Type && family.faction2Type !== 'Not in source') {
-      currentFactionLabel = family.faction2Type;
+
+  // --- 1. Resolve faction + status for this year ---
+  let rawFaction: string | undefined;
+  let rawStatus: string | undefined;
+
+  if (family.factionSnapshots && Object.keys(family.factionSnapshots).length > 0) {
+    // Snapshot path: find the most recent snapshot year <= current year
+    const snapshotYears = Object.keys(family.factionSnapshots).map(Number).sort((a, b) => a - b);
+    const applicableYear = [...snapshotYears].reverse().find(y => y <= year);
+    if (applicableYear !== undefined) {
+      rawFaction = family.factionSnapshots[applicableYear].faction;
+      rawStatus  = family.factionSnapshots[applicableYear].status;
+    }
+  } else {
+    // Legacy path: faction1Type / faction2Type fields
+    rawFaction = family.faction1Type;
+    rawStatus  = family.status1Class;
+    if (family.faction2Year && year >= family.faction2Year && family.faction2Type && family.faction2Type !== 'Not in source') {
+      rawFaction = family.faction2Type;
+    }
+    if (family.status2Year && year >= family.status2Year && family.status2Class && family.status2Class !== 'Not in source') {
+      rawStatus = family.status2Class;
+    }
   }
 
-  // --- MAGNATE LOGIC ---
-  // A family is visually highlighted as a Magnate only if they are flagged as such
-  // AND the year is >= 1293 (Ordinances of Justice).
+  const { faction: currentFactionLabel, subFaction } = normalizeFaction(rawFaction);
+  const currentStatusLabel = normalizeStatus(rawStatus);
+
+  // --- 2. Magnate (affects color only, not position) ---
   const isMagnate = (family.isMagnate === true) && (year >= 1293);
 
-  // --- EXILE LOGIC ---
-  // Specific hardcoded checks based on major historical events if not explicit in data, 
-  // but we prefer data-driven. However, general Ghibelline/Guelf rules still apply.
-  
-  // Rule 1 & 2: The Great Faction Wars (1260 - 1267)
+  // --- 3. Exile logic (historical events, applied on top of faction data) ---
+  // Battle of Montaperti 1260: Ghibellines take Florence, Guelf families expelled
   if (year >= 1260 && year < 1266) {
-    if (currentFactionLabel === 'Guelf') {
-      isExiled = true;
-    }
-  } else if (year >= 1266) {
-    if (currentFactionLabel === 'Ghibelline') {
-      isExiled = true;
-    }
+    if (currentFactionLabel === 'Guelf') isExiled = true;
   }
-  
-  // The Schism (1302+)
-  if (year >= 1302 && family.subFaction === 'White') {
-     // White Guelfs exiled after 1302
-     isExiled = true;
+  // Battle of Benevento 1266: Ghibellines expelled permanently
+  if (year >= 1266) {
+    if (currentFactionLabel === 'Ghibelline') isExiled = true;
   }
+  // The Schism 1302: White Guelfs exiled (Dante etc.)
+  if (year >= 1302 && subFaction === 'White') isExiled = true;
 
-
-  // --- VISUAL GROUPING ---
-  let visualGroup: CalculatedState['visualGroup'] = 'Guelf'; // Default fallback
-  
+  // --- 4. Visual group ---
+  let visualGroup: CalculatedState['visualGroup'] = 'Guelf';
   if (isExiled) {
-      visualGroup = 'Exile';
-  } else {
-      if (currentFactionLabel === 'Ghibelline') {
-          visualGroup = 'Ghibelline';
-      } else if (currentFactionLabel === 'Guelf') {
-           // Check Subfactions for Guelfs
-           if (year >= 1300) {
-               if (family.subFaction === 'White') visualGroup = 'White';
-               else if (family.subFaction === 'Black') visualGroup = 'Black';
-               else visualGroup = 'Guelf';
-           } else {
-               visualGroup = 'Guelf';
-           }
-      }
+    visualGroup = 'Exile';
+  } else if (currentFactionLabel === 'Ghibelline') {
+    visualGroup = 'Ghibelline';
+  } else if (currentFactionLabel === 'Guelf') {
+    if (year >= 1300 && subFaction === 'White') visualGroup = 'White';
+    else if (year >= 1300 && subFaction === 'Black') visualGroup = 'Black';
+    else visualGroup = 'Guelf';
   }
 
+  // --- 5. Positioning ---
+  // ViewBox: 0 0 260 90
+  // Sidebar labels: 0–40 | Ghibelline: 40–110 (center 75) | Guelf: 110–260 (center 185)
+  // White: 145 | Black: 225
 
-  // --- POSITIONING LOGIC ---
-  // ViewBox: 0 0 260 90 
-  // Sidebar (Labels): 0-40 (Increased gutter)
-  // Ghibelline: 40-110 (Center 75)
-  // Divider: 110
-  // Guelf: 110-260 (Center 185)
-  // White: 145
-  // Black: 225
-  
-  // Vertical Lanes (Based on Social Class)
-  let y = 80; 
-  if (currentStatusLabel === 'Noble') {
-      y = 24; // Grandi Lane
-  } else if (currentStatusLabel === 'Popolo Grasso' || currentStatusLabel === 'Grassi') {
-      y = 56; // Grassi Lane
-  } else {
-      y = 80; // Popolo Lane
-  }
+  let y = 80; // Popolo lane (default)
+  if (currentStatusLabel === 'Noble') y = 24;
+  else if (currentStatusLabel === 'Grassi') y = 56;
 
-  // Horizontal Positioning
   let x = 185;
-  
   if (isExiled) {
-    // Exiles move to edges. 
-    x = (family.faction1Type === 'Ghibelline' || family.faction2Type === 'Ghibelline') ? 45 : 255;
+    // Exiled Ghibellines drift left, exiled Guelfs drift right
+    x = currentFactionLabel === 'Ghibelline' ? 45 : 255;
+  } else if (visualGroup === 'Ghibelline') {
+    x = 75;
+  } else if (visualGroup === 'White') {
+    x = 145;
+  } else if (visualGroup === 'Black') {
+    x = 225;
   } else {
-    if (visualGroup === 'Ghibelline') {
-        x = 75; // Center of Ghibelline Section
-    } else if (visualGroup === 'Guelf') {
-        x = 185; // Center of Guelf Section
-    } else if (visualGroup === 'White') {
-        x = 145; 
-    } else if (visualGroup === 'Black') {
-        x = 225; 
-    }
+    x = 185; // Guelf center
   }
-  
+
   return {
     familyId: family.id,
     currentFactionLabel,
