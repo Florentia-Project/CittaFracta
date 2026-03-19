@@ -1,13 +1,15 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Family, CalculatedState } from '../../types';
 import { getFamilyDistrict } from '../../utils/districtUtils';
 import { normalizeAssetPath } from '../../utils/assetPaths';
+import { animate, utils } from 'animejs';
 
 interface FamilyDetailsPanelProps {
   selectedFamily: Family | null;
   currentState: CalculatedState | null;
   currentYear: number;
   onClose: () => void;
+  isHistoricalMode?: boolean;
 }
 
 function SectionHeader({ sigil, label }: { sigil: string; label: string }) {
@@ -24,7 +26,21 @@ export const FamilyDetailsPanel: React.FC<FamilyDetailsPanelProps> = ({
   currentState,
   currentYear,
   onClose,
+  isHistoricalMode = false,
 }) => {
+  const nameRef = useRef<HTMLHeadingElement>(null);
+
+  useEffect(() => {
+    if (!selectedFamily || !isHistoricalMode || !nameRef.current) return;
+    utils.set(nameRef.current, { opacity: 0, translateX: -4 });
+    animate(nameRef.current, {
+      opacity: [0, 1],
+      translateX: [-4, 0],
+      duration: 500,
+      ease: 'outExpo',
+      delay: 150,
+    });
+  }, [selectedFamily?.name, isHistoricalMode]);
   return (
     <div
       className={`absolute z-40
@@ -61,7 +77,7 @@ export const FamilyDetailsPanel: React.FC<FamilyDetailsPanelProps> = ({
               </div>
             )}
             <div className="flex-1 min-w-0 pt-1">
-              <h2 className="font-display text-xl text-ink leading-tight mb-1">
+              <h2 ref={nameRef} className="font-display text-xl text-ink leading-tight mb-1">
                 {selectedFamily.name}
               </h2>
               <p className="font-label text-[9px] tracking-[0.2em] text-rubric uppercase">
@@ -181,6 +197,17 @@ export const FamilyDetailsPanel: React.FC<FamilyDetailsPanelProps> = ({
             )}
 
           </div>
+
+          {/* Marginalia creature — Scriptorium mode only */}
+          {isHistoricalMode && (
+            <img
+              src={normalizeAssetPath('/assets/marginalia/creature-lion.svg')}
+              className="absolute bottom-16 right-3 w-20 h-20 opacity-25 pointer-events-none select-none"
+              aria-hidden="true"
+              alt=""
+              onError={(e) => { e.currentTarget.style.display = 'none'; }}
+            />
+          )}
 
           {/* Non-scrolling close button */}
           <button

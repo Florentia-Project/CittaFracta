@@ -22,7 +22,7 @@ export const TimelineSlider: React.FC<TimelineSliderProps> = ({
   onResetZoom,
 }) => {
   return (
-    <div className="bg-parchment pb-4 sm:pb-6 pt-2 px-4 sm:px-12 shrink-0 z-30 relative">
+    <div className="bg-parchment pb-4 sm:pb-6 pt-2 px-4 sm:px-12 shrink-0 z-30 relative scriptorium-timeline">
       <div className="max-w-6xl mx-auto w-full relative flex items-center gap-4 sm:gap-8">
 
         {/* Zoom controls — left of track */}

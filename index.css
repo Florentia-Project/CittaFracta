@@ -70,33 +70,54 @@ path.district-glow {
 }
 
 /* ═══════════════════════════════════════════════════════════════
- * SCRIPTORIO MODE — "Scriptorium Obscurum"
- * A full medieval Florentine manuscript transformation.
- * Toggled by adding .historical-mode to the root element.
- * Rules: NEVER change layout properties. Only visual styling.
+ * FLORENTINE PIGMENT PALETTE — CSS Custom Properties
+ * Always available in both modes. These are the actual pigments
+ * available to a 13th-century Florentine scribe.
  * ═══════════════════════════════════════════════════════════════ */
 
-/* ── LAYER 1: Base parchment — deeply aged vellum with ruling lines and ink stains ── */
+:root {
+  --vellum:           #EFE5C0;
+  --vellum-aged:      #E4D5A0;
+  --vellum-shadow:    #C9B882;
+  --iron-gall:        #2A1A0A;
+  --iron-gall-faded:  #5C3A20;
+  --iron-gall-sepia:  #8B6040;
+  --vermillion:       #B83A2A;
+  --vermillion-light: #D04030;
+  --ultramarine:      #1F3A7A;
+  --ultramarine-mid:  #2E52A8;
+  --verdigris:        #3D7A5A;
+  --verdigris-light:  #5A9E78;
+  --gold-leaf:        #C9A840;
+  --gold-leaf-bright: #E8C850;
+  --ochre:            #B8860B;
+  --lead-white:       #EDE8DC;
+}
+
+/* ── LAYER 1: Vellum base — animal-skin texture tile ── */
 .historical-mode {
-  background-color: #BFA07A;
-  background-image:
-    /* Ink-stain patches — organic aging, not uniform */
-    radial-gradient(ellipse 70% 50% at 12% 18%, rgba(80, 42, 8, 0.18) 0%, transparent 65%),
-    radial-gradient(ellipse 55% 40% at 88% 85%, rgba(70, 35, 6, 0.15) 0%, transparent 60%),
-    radial-gradient(ellipse 35% 25% at 65% 10%, rgba(90, 50, 12, 0.10) 0%, transparent 55%),
-    radial-gradient(ellipse 45% 30% at 30% 92%, rgba(60, 30, 5, 0.12) 0%, transparent 60%),
-    /* Scribe ruling lines — visible horizontal guides, as on actual vellum */
-    repeating-linear-gradient(
-      0deg,
-      transparent,
-      transparent 26px,
-      rgba(100, 58, 14, 0.22) 26px,
-      rgba(100, 58, 14, 0.22) 27.5px
-    ),
-    /* Organic grain — fractal noise */
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='500' height='500'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.72' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='500' height='500' filter='url(%23n)' opacity='0.055'/%3E%3C/svg%3E");
-  font-family: 'IM Fell English', Georgia, serif !important;
-  color: #1C1008 !important;
+  /* Remap Tailwind colour tokens to Florentine pigments */
+  --parchment:      var(--vellum);
+  --parchment-mid:  var(--vellum-aged);
+  --parchment-deep: var(--vellum-shadow);
+  --ink:            var(--iron-gall);
+  --ink-faded:      var(--iron-gall-faded);
+  --rubric:         var(--vermillion);
+  --earth-orange:   var(--gold-leaf);
+
+  background-color: var(--vellum);
+  background-image: url('/CittaFracta/assets/textures/vellum.svg');
+  background-repeat: repeat;
+  background-size: 300px 300px;
+  font-family: 'Crimson Pro', 'IM Fell English', Georgia, serif !important;
+  color: var(--iron-gall) !important;
+}
+
+/* Let the vellum texture show through panels — don't overlay with flat parchment */
+.historical-mode main,
+.historical-mode .bg-parchment {
+  background-color: transparent !important;
+  background-image: none !important;
 }
 
 /* ── LAYER 2: Vignette — dark, handled page edges (the single biggest impact change) ── */
@@ -118,9 +139,9 @@ path.district-glow {
     linear-gradient(180deg, rgba(45, 20, 4, 0.20) 0%, transparent 14%),
     /* Bottom edge darkening */
     linear-gradient(0deg, rgba(35, 14, 2, 0.16) 0%, transparent 10%),
-    /* Parchment grain tile */
-    url('/CittaFracta/assets/textures/parchment-preview.png') repeat;
-  background-size: 100%, 100%, 100%, 100%, 400px 400px;
+    /* Vellum texture tile */
+    url('/CittaFracta/assets/textures/vellum.svg') repeat;
+  background-size: 100%, 100%, 100%, 100%, 300px 300px;
   pointer-events: none;
   z-index: 0;
 }
@@ -139,54 +160,58 @@ path.district-glow {
   z-index: 1;
 }
 
-/* ── TYPOGRAPHY — iron gall ink depth throughout ── */
+/* ── TYPOGRAPHY — IM Fell English for all headings in Scriptorium ── */
 .historical-mode h1,
+.historical-mode h2,
 .historical-mode .font-display,
 .historical-mode [class*="font-display"] {
   font-family: 'IM Fell English', Georgia, serif !important;
-  color: #1C1008 !important;
-  text-shadow:
-    1px 1px 0 rgba(90, 50, 10, 0.45),
-    2px 2px 4px rgba(28, 14, 2, 0.20),
-    0 0 30px rgba(184, 146, 10, 0.08);
-  letter-spacing: 0.10em;
+  font-style: italic;
 }
 
-.historical-mode h2,
-.historical-mode h3,
-.historical-mode [class*="font-label"] {
-  font-family: 'Cinzel', serif !important;
-  color: #6B1414 !important;
-  letter-spacing: 0.22em !important;
-  text-shadow: 0.5px 0.5px 0 rgba(184, 146, 10, 0.25) !important;
+/* Remove ALL text-shadow in Scriptorium — fixes glow on GHIBELLINES/GUELFS */
+.historical-mode * {
+  text-shadow: none !important;
 }
+
+/* No rounded corners — manuscripts have square edges */
+.historical-mode *:not(input):not(button.touch-exempt) {
+  border-radius: 0 !important;
+}
+
+/* Borders become iron-gall ruling lines */
+.historical-mode [class*="border-"] {
+  border-color: rgba(42, 26, 10, 0.20) !important;
+}
+
+/* Gold text selection */
+.historical-mode ::selection {
+  background: var(--gold-leaf);
+  color: var(--iron-gall);
+}
+
+/* Scrollbar — iron gall ink, square */
+.historical-mode ::-webkit-scrollbar { width: 6px; }
+.historical-mode ::-webkit-scrollbar-track { background: var(--vellum-aged); }
+.historical-mode ::-webkit-scrollbar-thumb { background: var(--iron-gall-faded); border-radius: 0; }
 
 /* ── HEADER — rubricated manuscript title page ── */
 .historical-mode header {
-  background-color: #C4A070 !important;
-  border-bottom: 2.5px solid #6B1414 !important;
-  box-shadow:
-    0 3px 0 rgba(184, 146, 10, 0.40),
-    0 5px 16px rgba(28, 14, 2, 0.18) !important;
+  background-color: transparent !important;
+  border-bottom: 1.5px solid rgba(184, 146, 10, 0.50) !important;
+  box-shadow: 0 2px 0 rgba(184, 146, 10, 0.20) !important;
 }
 
-/* ── PANELS & SIDEBARS — aged folio pages ── */
+/* ── PANELS & SIDEBARS — let vellum texture show through ── */
 .historical-mode [class*="bg-parchment"] {
-  background-color: #C9A87C !important;
-  background-image:
-    repeating-linear-gradient(
-      0deg,
-      transparent,
-      transparent 26px,
-      rgba(100, 58, 14, 0.12) 26px,
-      rgba(100, 58, 14, 0.12) 27px
-    ) !important;
+  background-color: rgba(239, 229, 192, 0.55) !important;
+  background-image: none !important;
 }
 
 .historical-mode aside {
-  background-color: #C4A070 !important;
-  border-left: 3px solid #6B1414 !important;
-  box-shadow: inset -3px 0 12px rgba(28, 14, 2, 0.12), -1px 0 6px rgba(28, 14, 2, 0.08) !important;
+  background-color: rgba(228, 213, 160, 0.60) !important;
+  border-left: 2px solid rgba(42, 26, 10, 0.30) !important;
+  box-shadow: inset -2px 0 8px rgba(42, 26, 10, 0.08) !important;
 }
 
 /* ── LEAFLET MAP — parchment cartography (deep sepia + aging) ── */
@@ -284,6 +309,7 @@ path.district-glow {
   border-color: #6B1414 !important;
 }
 
+
 /* ═══════════════════════════════════════
    MOBILE — Touch & Motion
    ═══════════════════════════════════════ */
@@ -338,4 +364,17 @@ path.district-glow {
     font-size: 8px !important;
   }
 
+}
+
+/* ── MODE TRANSITION FLASH — vellum light when lifting a page ── */
+@keyframes modeFlash {
+  0%   { opacity: 0; }
+  40%  { opacity: 0.7; }
+  100% { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  @keyframes modeFlash {
+    0%, 100% { opacity: 0; }
+  }
 }

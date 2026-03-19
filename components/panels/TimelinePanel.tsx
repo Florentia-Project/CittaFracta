@@ -33,7 +33,7 @@ export const TimelinePanel: React.FC<TimelinePanelProps> = ({
         <span className="hidden sm:block text-[10px] font-sans uppercase tracking-[0.2em] text-ink-light mb-1">
           Anno Domini
         </span>
-        <span className="block text-xl sm:text-4xl font-display text-ink font-bold">
+        <span className="block text-xl sm:text-4xl font-display text-ink font-bold scriptorium-year">
           {currentYear}
         </span>
       </div>

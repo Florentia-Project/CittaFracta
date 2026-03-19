@@ -11,9 +11,10 @@ interface HistoricalMapProps {
   onSelectFamily: (family: Family) => void;
   selectedFamilyId?: string;
   onZoomReady?: (zoomIn: () => void, zoomOut: () => void, resetZoom: () => void) => void;
+  isHistoricalMode?: boolean;
 }
 
-const HistoricalMap: React.FC<HistoricalMapProps> = ({ data, year, onSelectFamily, selectedFamilyId, onZoomReady }) => {
+const HistoricalMap: React.FC<HistoricalMapProps> = ({ data, year, onSelectFamily, selectedFamilyId, onZoomReady, isHistoricalMode = false }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   
   // Dimensions of the viewport
@@ -406,7 +407,17 @@ const HistoricalMap: React.FC<HistoricalMapProps> = ({ data, year, onSelectFamil
 
   return (
     <div className="flex-1 w-full h-full relative p-0 select-none bg-parchment overflow-hidden" ref={containerRef}>
-      
+
+      {isHistoricalMode && (
+        <img
+          src={normalizeAssetPath('/assets/marginalia/foliage-spray.svg')}
+          className="absolute bottom-2 right-2 w-28 opacity-30 pointer-events-none select-none z-10"
+          aria-hidden="true"
+          alt=""
+          onError={(e) => { e.currentTarget.style.display = 'none'; }}
+        />
+      )}
+
       <div
         className={`w-full h-full ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
         style={{ touchAction: 'none' }}
@@ -466,12 +477,14 @@ const HistoricalMap: React.FC<HistoricalMapProps> = ({ data, year, onSelectFamil
                     }}
                     style={{
                       transform: `translate(${vm.position.x}px, ${vm.position.y}px)`,
-                      opacity: vm.isExiled ? 0.6 : 1,
-                      transition: 'transform 380ms cubic-bezier(0.22, 1, 0.36, 1), opacity 300ms ease',
+                      transition: 'transform 380ms cubic-bezier(0.22, 1, 0.36, 1)',
                       willChange: 'transform',
                     }}
                   >
-                     {/* Scale compensation for constant border widths if desired, but here we let them scale naturally for visual depth */}
+                  <g
+                    className="scriptorium-family-cell"
+                    style={{ opacity: vm.isExiled ? 0.6 : 1 }}
+                  >
                      {isSelected && (
                          <rect x={-width/2 - 1.2} y={-height/2 - 1.2} width={width + 2.4} height={height + 2.4} fill="none" stroke="#C17C59" strokeWidth={0.8} rx={1} className="opacity-80"/>
                     )}
@@ -482,7 +495,13 @@ const HistoricalMap: React.FC<HistoricalMapProps> = ({ data, year, onSelectFamil
                     {vm.hasCoA && vm.coatOfArmsUrl && (
                         <foreignObject x={imageX} y={-imageSize/2} width={imageSize} height={imageSize} className="overflow-visible">
                           <div className="w-full h-full flex items-center justify-center">
-                             <img src={normalizeAssetPath(vm.coatOfArmsUrl)} alt="" className="w-full h-full object-cover" style={{ filter: 'sepia(0.2) contrast(1.1)', mixBlendMode: 'multiply' }} />
+                             <img
+                               src={normalizeAssetPath(vm.coatOfArmsUrl)}
+                               alt=""
+                               className="w-full h-full object-contain shrink-0 block"
+                               style={{ filter: 'sepia(0.2) contrast(1.1)', mixBlendMode: 'multiply' }}
+                               onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                             />
                           </div>
                         </foreignObject>
                     )}
@@ -494,6 +513,7 @@ const HistoricalMap: React.FC<HistoricalMapProps> = ({ data, year, onSelectFamil
                          <text x={0} y={0} textAnchor="middle" fontSize={1.2} fill="#C17C59" className="font-display font-bold uppercase tracking-widest pointer-events-none">EXILE</text>
                        </g>
                     )}
+                  </g>
                   </g>
                 );
             })}
@@ -516,21 +536,20 @@ const HistoricalMap: React.FC<HistoricalMapProps> = ({ data, year, onSelectFamil
           </defs>
 
           {/* Top Sticky Headers (Factions) - Y is fixed, X tracks map */}
-          <text x={getX(75)} y={topLabelY} textAnchor="middle" filter="url(#text-halo)" className="font-display text-sm fill-ink font-bold tracking-[0.3em] uppercase pointer-events-none">Ghibellines</text>
-          <text x={getX(185)} y={topLabelY} textAnchor="middle" filter="url(#text-halo)" className="font-display text-sm fill-ink font-bold tracking-[0.3em] uppercase pointer-events-none">Guelfs</text>
-          
+          <text x={getX(75)} y={topLabelY} textAnchor="middle" className="font-display text-sm fill-ink font-bold tracking-[0.3em] uppercase pointer-events-none scriptorium-faction-col">Ghibellines</text>
+          <text x={getX(185)} y={topLabelY} textAnchor="middle" className="font-display text-sm fill-ink font-bold tracking-[0.3em] uppercase pointer-events-none scriptorium-faction-col">Guelfs</text>
+
           {year >= 1300 && (
              <>
-                 <text x={getX(147.5)} y={topLabelY + 15} textAnchor="middle" filter="url(#text-halo)" className="font-sans text-[10px] fill-ink/60 font-bold uppercase tracking-wider pointer-events-none">White</text>
-                 <text x={getX(222.5)} y={topLabelY + 15} textAnchor="middle" filter="url(#text-halo)" className="font-sans text-[10px] fill-ink/60 font-bold uppercase tracking-wider pointer-events-none">Black</text>
+                 <text x={getX(147.5)} y={topLabelY + 15} textAnchor="middle" className="font-sans text-[10px] fill-ink/60 font-bold uppercase tracking-wider pointer-events-none scriptorium-faction-col">White</text>
+                 <text x={getX(222.5)} y={topLabelY + 15} textAnchor="middle" className="font-sans text-[10px] fill-ink/60 font-bold uppercase tracking-wider pointer-events-none scriptorium-faction-col">Black</text>
              </>
           )}
 
           {/* Left Sticky Headers (Classes) - X is fixed, Y tracks map */}
-          {/* Note: In data, Row Centers are approx 26, 57, 85. Or use lane tops 14, 46, 78 */}
-          <text x={leftLabelX} y={getY(26.5)} textAnchor="start" filter="url(#text-halo)" className="font-display text-xs fill-ink font-bold tracking-[0.2em] uppercase opacity-70 pointer-events-none">Grandi</text>
-          <text x={leftLabelX} y={getY(57)} textAnchor="start" filter="url(#text-halo)" className="font-display text-xs fill-ink font-bold tracking-[0.2em] uppercase opacity-70 pointer-events-none">Grassi</text>
-          <text x={leftLabelX} y={getY(85)} textAnchor="start" filter="url(#text-halo)" className="font-display text-xs fill-ink font-bold tracking-[0.2em] uppercase opacity-70 pointer-events-none">Popolo</text>
+          <text x={leftLabelX} y={getY(26.5)} textAnchor="start" className="font-display text-xs fill-ink font-bold tracking-[0.2em] uppercase opacity-70 pointer-events-none scriptorium-class-label">Grandi</text>
+          <text x={leftLabelX} y={getY(57)} textAnchor="start" className="font-display text-xs fill-ink font-bold tracking-[0.2em] uppercase opacity-70 pointer-events-none scriptorium-class-label">Grassi</text>
+          <text x={leftLabelX} y={getY(85)} textAnchor="start" className="font-display text-xs fill-ink font-bold tracking-[0.2em] uppercase opacity-70 pointer-events-none scriptorium-class-label">Popolo</text>
 
         </svg>
       </div>

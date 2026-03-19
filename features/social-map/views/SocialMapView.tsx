@@ -14,6 +14,7 @@ interface SocialMapViewProps {
   activeEvent: HistoricalEvent | undefined;
   onOpenChronicle: () => void;
   onZoomReady?: (zoomIn: () => void, zoomOut: () => void, resetZoom: () => void) => void;
+  isHistoricalMode?: boolean;
 }
 
 export const SocialMapView: React.FC<SocialMapViewProps> = ({
@@ -26,6 +27,7 @@ export const SocialMapView: React.FC<SocialMapViewProps> = ({
   activeEvent,
   onOpenChronicle,
   onZoomReady,
+  isHistoricalMode = false,
 }) => {
   return (
     <div className="flex-1 relative h-full flex flex-col sm:flex-row">
@@ -46,6 +48,7 @@ export const SocialMapView: React.FC<SocialMapViewProps> = ({
           onSelectFamily={onSelectFamily}
           selectedFamilyId={selectedFamily?.id}
           onZoomReady={onZoomReady}
+          isHistoricalMode={isHistoricalMode}
         />
       </div>
 

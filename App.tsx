@@ -24,6 +24,7 @@ import { SocialMapView } from './features/social-map/views/SocialMapView';
 // --- Custom Hooks ---
 import { useTimeline } from './hooks/useTimeline';
 import { useHistoricalData } from './hooks/useHistoricalData';
+import { useScriptoriumReveal } from './hooks/useScriptoriumReveal';
 
 const App: React.FC = () => {
   // --- 1. Historical Data Hook ---
@@ -32,9 +33,26 @@ const App: React.FC = () => {
   // --- 2. Local UI State ---
   const [activeTab, setActiveTab] = useState<'map' | 'city'>('map');
   const [selectedFamily, setSelectedFamily] = useState<Family | null>(null);
-  const [historicalMode, setHistoricalMode] = useState(false);
+  const [historicalMode, setHistoricalMode] = useState<boolean>(() => {
+    const stored = localStorage.getItem('historicalMode');
+    return stored === null ? true : stored === 'true';
+  });
   const [yearSheetOpen, setYearSheetOpen] = useState(false);
-  const toggleHistoricalMode = useCallback(() => setHistoricalMode(m => !m), []);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+
+  const toggleHistoricalMode = useCallback(() => setHistoricalMode(m => {
+    const next = !m;
+    localStorage.setItem('historicalMode', String(next));
+    return next;
+  }), []);
+
+  const handleToggleMode = useCallback(() => {
+    setIsTransitioning(true);
+    setTimeout(() => {
+      toggleHistoricalMode();
+      setTimeout(() => setIsTransitioning(false), 350);
+    }, 150);
+  }, [toggleHistoricalMode]);
 
   // --- 3. Timeline Hook ---
   // Enable keyboard shortcuts ONLY when viewing the political map
@@ -60,6 +78,12 @@ const App: React.FC = () => {
   };
 
   const currentState = selectedFamily ? calculateFamilyState(selectedFamily, currentYear) : null;
+
+  // --- Scriptorium reveal animation ---
+  useScriptoriumReveal({
+    isHistoricalMode: historicalMode,
+    isReady: !isLoading && data.length > 0,
+  });
 
   if (isLoading) {
     return (
@@ -88,17 +112,17 @@ const App: React.FC = () => {
       <FolioHeader
         activeTab={activeTab}
         isHistoricalMode={historicalMode}
-        toggleHistoricalMode={toggleHistoricalMode}
+        toggleHistoricalMode={handleToggleMode}
       />
 
       {/* Desktop Header */}
-      <header className="pt-3 sm:pt-4 pb-2 px-4 sm:px-8 flex justify-between items-end shrink-0 z-40 relative border-b border-ink/40 mx-3 sm:mx-6">
+      <header className="pt-3 sm:pt-4 pb-2 px-4 sm:px-8 flex justify-between items-end shrink-0 z-40 relative mx-3 sm:mx-6">
         <Header />
         <div className="flex items-end gap-5">
           <TabNavigation activeTab={activeTab} setActiveTab={setActiveTab} />
           {/* Scriptorio mode toggle */}
           <button
-            onClick={() => setHistoricalMode(m => !m)}
+            onClick={handleToggleMode}
             title={historicalMode ? 'Switch to modern view' : 'Switch to Scriptorio historical view'}
             className={`mb-2 text-[9px] font-sans font-bold tracking-widest uppercase border px-2 py-1 rounded transition-colors ${
               historicalMode
@@ -106,9 +130,10 @@ const App: React.FC = () => {
                 : 'border-ink/20 text-ink-light/60 hover:border-ink/40 hover:text-ink-light'
             }`}
           >
-            {historicalMode ? '☀ Modern' : '☽ Scriptorio'}
+            {historicalMode ? '◈  MODERN' : '§  SCRIPTORIUM'}
           </button>
         </div>
+        <div className="scriptorium-header-line absolute bottom-0 left-0 right-0 h-px bg-ink/40" />
       </header>
 
       {/* Main Content */}
@@ -137,6 +162,7 @@ const App: React.FC = () => {
                 activeEvent={activeEvent}
                 onOpenChronicle={() => setIsChronicleOpen(true)}
                 onZoomReady={handleZoomReady}
+                isHistoricalMode={historicalMode}
               />
            )}
 
@@ -145,6 +171,7 @@ const App: React.FC = () => {
               currentState={currentState}
               currentYear={currentYear}
               onClose={() => handleSelectFamily(null)}
+              isHistoricalMode={historicalMode}
             />
         </div>
 
@@ -163,7 +190,18 @@ const App: React.FC = () => {
         )}
       </main>
 
-      {isChronicleOpen && activeEvent && <ChronicleModal event={activeEvent} onClose={() => setIsChronicleOpen(false)} />}
+      {isChronicleOpen && activeEvent && <ChronicleModal event={activeEvent} onClose={() => setIsChronicleOpen(false)} isHistoricalMode={historicalMode} />}
+
+      {/* Mode transition flash — brief vellum light like lifting a page */}
+      {isTransitioning && (
+        <div
+          className="fixed inset-0 z-[9999] pointer-events-none"
+          style={{
+            background: 'var(--vellum, #EFE5C0)',
+            animation: 'modeFlash 350ms ease-in-out forwards',
+          }}
+        />
+      )}
 
       {/* Mobile Bottom Dock */}
       <CodexDock

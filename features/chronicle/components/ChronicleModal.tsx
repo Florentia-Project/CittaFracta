@@ -1,15 +1,31 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { HistoricalEvent } from '../../../src/types';
 import { X, BookOpen, Feather, ChevronDown, ChevronUp } from 'lucide-react';
+import { animate, utils } from 'animejs';
+import { normalizeAssetPath } from '../../../utils/assetPaths';
 
 interface ChronicleModalProps {
   event: HistoricalEvent | null;
   onClose: () => void;
+  isHistoricalMode?: boolean;
 }
 
-const ChronicleModal: React.FC<ChronicleModalProps> = ({ event, onClose }) => {
+const ChronicleModal: React.FC<ChronicleModalProps> = ({ event, onClose, isHistoricalMode = false }) => {
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
+  const titleRef = useRef<HTMLHeadingElement>(null);
+
+  useEffect(() => {
+    if (!event || !isHistoricalMode || !titleRef.current) return;
+    utils.set(titleRef.current, { opacity: 0, translateX: -4 });
+    animate(titleRef.current, {
+      opacity: [0, 1],
+      translateX: [-4, 0],
+      duration: 500,
+      ease: 'outExpo',
+      delay: 150,
+    });
+  }, [event?.title, isHistoricalMode]);
 
   if (!event) return null;
 
@@ -38,7 +54,8 @@ const ChronicleModal: React.FC<ChronicleModalProps> = ({ event, onClose }) => {
         </div>
 
         {/* Body */}
-        <div className="flex-1 overflow-y-auto px-6 py-6">
+        <div className="flex-1 overflow-y-auto">
+        <div className="px-6 py-6">
 
           {/* Year */}
           <p className="font-display text-4xl text-ink leading-none pb-2 mb-6 border-b border-rubric/40 inline-block">
@@ -46,7 +63,7 @@ const ChronicleModal: React.FC<ChronicleModalProps> = ({ event, onClose }) => {
           </p>
 
           {/* Title */}
-          <h2 className="font-display text-xl text-ink leading-tight mb-4">
+          <h2 ref={titleRef} className="font-display text-xl text-ink leading-tight mb-4">
             {event.title}
           </h2>
 
@@ -81,6 +98,16 @@ const ChronicleModal: React.FC<ChronicleModalProps> = ({ event, onClose }) => {
             </div>
           )}
 
+        {isHistoricalMode && (
+          <img
+            src={normalizeAssetPath('/assets/marginalia/creature-dragon.svg')}
+            className="absolute bottom-4 right-4 w-20 h-20 opacity-20 pointer-events-none select-none"
+            aria-hidden="true"
+            alt=""
+            onError={(e) => { e.currentTarget.style.display = 'none'; }}
+          />
+        )}
+        </div>
         </div>
       </div>
     );
@@ -125,7 +152,7 @@ const ChronicleModal: React.FC<ChronicleModalProps> = ({ event, onClose }) => {
                 <BookOpen size={32} strokeWidth={1} />
             </div>
             
-            <h2 className="text-3xl md:text-5xl font-medieval font-bold text-ink leading-tight mb-2 drop-shadow-sm tracking-wide">
+            <h2 ref={titleRef} className="text-3xl md:text-5xl font-medieval font-bold text-ink leading-tight mb-2 drop-shadow-sm tracking-wide">
                 {event.title}
             </h2>
             <div className="flex items-center justify-center gap-3">
@@ -136,7 +163,7 @@ const ChronicleModal: React.FC<ChronicleModalProps> = ({ event, onClose }) => {
         </div>
 
         {/* Content Scroll Area */}
-        <div className="relative z-10 flex-1 overflow-y-auto p-8 pt-6 custom-scrollbar">
+        <div className="relative z-10 flex-1 overflow-y-auto p-8 pt-6">
             
             {/* Illuminated First Letter Style (Drop Cap) */}
             <div className="font-serif text-xl md:text-2xl leading-relaxed text-ink/90 text-justify">
@@ -185,6 +212,16 @@ const ChronicleModal: React.FC<ChronicleModalProps> = ({ event, onClose }) => {
                 </div>
             )}
         </div>
+
+        {isHistoricalMode && (
+          <img
+            src={normalizeAssetPath('/assets/marginalia/creature-dragon.svg')}
+            className="absolute bottom-10 right-4 w-24 h-24 opacity-20 pointer-events-none select-none z-10"
+            aria-hidden="true"
+            alt=""
+            onError={(e) => { e.currentTarget.style.display = 'none'; }}
+          />
+        )}
 
         {/* Footer decoration */}
         <div className="relative z-10 h-8 bg-[#E6DCCF] border-t border-ink/10 flex items-center justify-center">
