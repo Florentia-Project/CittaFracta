@@ -87,17 +87,35 @@ const App: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="h-screen flex flex-col items-center justify-center bg-parchment select-none px-8 gap-6 text-center">
+      <div
+        className="h-screen flex flex-col items-center justify-center select-none px-8 gap-4 text-center"
+        style={{
+          backgroundColor: 'var(--vellum, #EFE5C0)',
+          backgroundImage: "url('/CittaFracta/assets/textures/vellum.svg')",
+          backgroundRepeat: 'repeat',
+          backgroundSize: '300px 300px',
+        }}
+      >
         <span
-          className="text-9xl text-rubric animate-pulse"
-          style={{ fontFamily: "'IM Fell English', serif", opacity: 0.18, lineHeight: 1 }}
+          className="animate-pulse"
+          style={{
+            fontFamily: "'IM Fell English', serif",
+            fontSize: '120px',
+            color: 'var(--vermillion, #B83A2A)',
+            opacity: 0.15,
+            lineHeight: 1,
+          }}
           aria-hidden="true"
         >
-          F
+          C
         </span>
         <div className="flex flex-col gap-1.5">
-          <p className="font-label text-rubric text-[10px] tracking-[0.4em]">FLORENTINE ARCHIVE</p>
-          <p className="font-serif text-sm text-ink-faded italic">Loading historical records…</p>
+          <p style={{ fontFamily: "'Cinzel', serif", fontSize: '10px', letterSpacing: '0.35em', color: 'var(--vermillion, #B83A2A)' }}>
+            CITTA·FRACTA
+          </p>
+          <p style={{ fontFamily: "'Crimson Pro', serif", fontStyle: 'italic', fontSize: '14px', color: 'var(--iron-gall-faded, #5C3A20)' }}>
+            Caricamento dei registri storici…
+          </p>
         </div>
       </div>
     );

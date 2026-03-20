@@ -10,7 +10,7 @@ export function FolioHeader({ activeTab, isHistoricalMode, toggleHistoricalMode 
   const title = activeTab === 'city' ? 'CITY OF FLORENCE' : 'FACTIONS';
 
   return (
-    <header className="sm:hidden h-11 flex items-center justify-between px-4 bg-parchment border-b border-parchment-deep shrink-0 z-30">
+    <header className={`sm:hidden h-11 flex items-center justify-between px-4 border-b shrink-0 z-30 ${isHistoricalMode ? 'bg-transparent border-ink/15' : 'bg-parchment border-parchment-deep'}`}>
       <span className="font-label text-earth-orange text-lg select-none">✦</span>
 
       <span className="font-label text-ink text-[10px] tracking-[0.25em]">

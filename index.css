@@ -99,16 +99,18 @@ path.district-glow {
   /* Remap Tailwind colour tokens to Florentine pigments */
   --parchment:      var(--vellum);
   --parchment-mid:  var(--vellum-aged);
-  --parchment-deep: var(--vellum-shadow);
+  --parchment-deep: rgba(42, 26, 10, 0.20); /* iron-gall ruling line — NOT red */
   --ink:            var(--iron-gall);
   --ink-faded:      var(--iron-gall-faded);
   --rubric:         var(--vermillion);
   --earth-orange:   var(--gold-leaf);
 
-  background-color: var(--vellum);
+  background-color: #EAD9A8;
   background-image: url('/CittaFracta/assets/textures/vellum.svg');
-  background-repeat: repeat;
-  background-size: 300px 300px;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center center;
+  background-attachment: fixed;
   font-family: 'Crimson Pro', 'IM Fell English', Georgia, serif !important;
   color: var(--iron-gall) !important;
 }
@@ -138,10 +140,8 @@ path.district-glow {
     /* Top edge aging — where the page was thumbed */
     linear-gradient(180deg, rgba(45, 20, 4, 0.20) 0%, transparent 14%),
     /* Bottom edge darkening */
-    linear-gradient(0deg, rgba(35, 14, 2, 0.16) 0%, transparent 10%),
-    /* Vellum texture tile */
-    url('/CittaFracta/assets/textures/vellum.svg') repeat;
-  background-size: 100%, 100%, 100%, 100%, 300px 300px;
+    linear-gradient(0deg, rgba(35, 14, 2, 0.16) 0%, transparent 10%);
+  background-size: 100%, 100%, 100%, 100%;
   pointer-events: none;
   z-index: 0;
 }
@@ -196,10 +196,11 @@ path.district-glow {
 .historical-mode ::-webkit-scrollbar-thumb { background: var(--iron-gall-faded); border-radius: 0; }
 
 /* ── HEADER — rubricated manuscript title page ── */
+/* Both mobile FolioHeader and desktop header: transparent, single iron-gall ruling line */
 .historical-mode header {
   background-color: transparent !important;
-  border-bottom: 1.5px solid rgba(184, 146, 10, 0.50) !important;
-  box-shadow: 0 2px 0 rgba(184, 146, 10, 0.20) !important;
+  border-bottom: 1px solid rgba(42, 26, 10, 0.15) !important;
+  box-shadow: none !important;
 }
 
 /* ── PANELS & SIDEBARS — let vellum texture show through ── */
@@ -214,6 +215,30 @@ path.district-glow {
   box-shadow: inset -2px 0 8px rgba(42, 26, 10, 0.08) !important;
 }
 
+/* ── MAP PINS — ink dots, not modern UI boxes ── */
+.historical-mode .family-marker,
+.historical-mode [class*="family-marker"] {
+  border-radius: 0 !important;
+  border: 1px solid rgba(42, 26, 10, 0.6) !important;
+  background-color: rgba(42, 26, 10, 0.7) !important;
+  box-shadow: none !important;
+}
+
+/* Leaflet zoom controls — manuscript style */
+.historical-mode .leaflet-control-zoom a {
+  background-color: rgba(234, 217, 168, 0.9) !important;
+  border: 1px solid rgba(42, 26, 10, 0.2) !important;
+  border-radius: 0 !important;
+  color: var(--iron-gall, #2A1A0A) !important;
+  font-family: 'Cinzel', serif !important;
+  box-shadow: none !important;
+}
+
+.historical-mode .leaflet-control-zoom a:hover {
+  background-color: rgba(234, 217, 168, 1) !important;
+  border-color: rgba(42, 26, 10, 0.4) !important;
+}
+
 /* ── LEAFLET MAP — parchment cartography (deep sepia + aging) ── */
 .historical-mode .leaflet-container {
   filter: sepia(65%) contrast(88%) brightness(90%) saturate(70%) hue-rotate(-8deg) !important;
@@ -225,17 +250,38 @@ path.district-glow {
   filter: sepia(35%) contrast(97%) brightness(96%) saturate(85%);
 }
 
-/* Family name boxes — aged parchment fill over the default #F3EDE2 */
-.historical-mode svg rect:not([fill="none"]):not([fill="transparent"]) {
-  fill: #D4B080 !important;
+/* Family cells (SVG) — fill handled directly in JSX; remove the old tan override */
+/* Family cells (HTML mobile grid) — no white background, register entry style */
+.historical-mode [class*="flex"][class*="items-center"][class*="rounded"][class*="border"] {
+  background-color: transparent !important;
+  border: none !important;
+  border-bottom: 1px solid rgba(42, 26, 10, 0.10) !important;
+  border-radius: 0 !important;
+}
+.historical-mode [class*="flex"][class*="items-center"][class*="rounded"][class*="border"]:hover {
+  background-color: rgba(42, 26, 10, 0.04) !important;
+  border-left: 2px solid rgba(184, 58, 42, 0.5) !important;
 }
 
-/* ── TIMELINE — chronicle scroll bar ── */
-.historical-mode [class*="timeline"],
-.historical-mode [class*="slider"] {
-  background-color: #C4A070 !important;
-  border-top: 2.5px solid #6B1414 !important;
-  box-shadow: 0 -3px 0 rgba(184, 146, 10, 0.30), 0 -5px 14px rgba(28, 14, 2, 0.14) !important;
+/* ── TIMELINE — transparent, sits on same vellum as the map ── */
+.historical-mode .scriptorium-timeline,
+.historical-mode [class*="bg-parchment"][class*="pb-4"],
+.historical-mode [class*="bg-parchment"][class*="pb-6"] {
+  background-color: transparent !important;
+  border-top: 1px solid rgba(42, 26, 10, 0.12) !important;
+  box-shadow: none !important;
+}
+
+/* Current year marker — square ink stamp, not orange circle */
+.historical-mode [class*="bg-earth-orange"][class*="rounded-full"],
+.historical-mode [class*="w-1.5"][class*="rounded"] {
+  background-color: var(--iron-gall, #2A1A0A) !important;
+  border-radius: 0 !important;
+}
+
+/* Year labels on timeline */
+.historical-mode [class*="text-\\[9px\\]"][class*="text-ink"] {
+  color: rgba(42, 26, 10, 0.45) !important;
 }
 
 /* ── YEAR DISPLAY — illuminated numeral, centerpiece of the folio ── */
@@ -257,14 +303,88 @@ path.district-glow {
   text-shadow: 0.5px 0.5px 0 rgba(184, 146, 10, 0.20) !important;
 }
 
-/* ── COAT OF ARMS — illuminated miniature frame ── */
-.historical-mode img {
-  border: 1.5px solid rgba(184, 146, 10, 0.50) !important;
-  box-shadow:
-    0 0 0 1px rgba(107, 20, 20, 0.30),
-    2px 3px 10px rgba(28, 14, 2, 0.28),
-    inset 0 0 4px rgba(184, 146, 10, 0.08) !important;
-  background: #EDD68A !important;
+/* ── COAT OF ARMS — blend directly onto vellum, no bounding box ── */
+.historical-mode img[src*="CoatOfArms"],
+.historical-mode img[src*=".svg"] {
+  mix-blend-mode: multiply;
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  filter: sepia(0.15) contrast(1.05);
+}
+
+/* ── CITY MAP SIDEBAR — warm semi-transparent vellum, manuscript controls ── */
+.historical-mode .w-80 {
+  background-color: rgba(234, 217, 168, 0.30) !important;
+  backdrop-filter: none !important;
+  box-shadow: none !important;
+  border-right: 1px solid rgba(42, 26, 10, 0.15) !important;
+}
+
+/* All sidebar buttons — no rounded corners, no white bg */
+.historical-mode .w-80 button {
+  border-radius: 0 !important;
+  background-color: transparent !important;
+  border-color: rgba(42, 26, 10, 0.20) !important;
+  color: var(--iron-gall, #2A1A0A) !important;
+  font-family: 'Cinzel', serif !important;
+  letter-spacing: 0.1em !important;
+}
+
+/* Active/selected state — vermillion mark */
+.historical-mode .w-80 button[class*="bg-earth"],
+.historical-mode .w-80 button[class*="bg-rubric"],
+.historical-mode .w-80 button[class*="text-parchment"] {
+  background-color: var(--vermillion, #B83A2A) !important;
+  color: var(--vellum, #EFE5C0) !important;
+}
+
+/* Section labels */
+.historical-mode .w-80 [class*="font-label"],
+.historical-mode .w-80 [class*="tracking-"] {
+  color: var(--vermillion, #B83A2A) !important;
+  letter-spacing: 0.25em !important;
+}
+
+/* Search input */
+.historical-mode input[type="text"],
+.historical-mode input[type="search"] {
+  background-color: transparent !important;
+  border: none !important;
+  border-bottom: 1px solid rgba(42, 26, 10, 0.2) !important;
+  border-radius: 0 !important;
+  font-family: 'Crimson Pro', serif !important;
+  color: var(--iron-gall, #2A1A0A) !important;
+  box-shadow: none !important;
+}
+
+/* ── FAMILY DETAIL PANEL — same vellum as the page ── */
+.historical-mode [class*="w-80"][class*="border-l"] {
+  background-color: rgba(234, 217, 168, 0.85) !important;
+  border-left: 1px solid rgba(42, 26, 10, 0.15) !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+}
+
+/* Close button — manuscript stamp */
+.historical-mode aside button[class*="×"],
+.historical-mode aside button[title*="lose"],
+.historical-mode aside button[class*="close"],
+.historical-mode aside > div:first-child button {
+  border-radius: 0 !important;
+  border: 1px solid rgba(42, 26, 10, 0.2) !important;
+  background-color: transparent !important;
+  font-family: 'Cinzel', serif !important;
+  letter-spacing: 0.15em !important;
+  color: var(--iron-gall, #2A1A0A) !important;
+}
+
+/* Section headings inside the panel */
+.historical-mode aside [class*="font-label"],
+.historical-mode aside [class*="tracking-"] {
+  color: var(--vermillion, #B83A2A) !important;
+  font-family: 'Cinzel', serif !important;
+  letter-spacing: 0.2em !important;
 }
 
 /* ── CHRONICLE MODAL — scroll folio ── */
@@ -272,6 +392,20 @@ path.district-glow {
   background-color: #C9A87C !important;
   border: 1.5px solid #6B1414 !important;
   border-radius: 0 !important;
+}
+
+/* ── MODE TOGGLE BUTTON — iron-gall stamp, no rounded corners ── */
+.historical-mode button[title*="modern"],
+.historical-mode button[title*="Scriptorio"],
+.historical-mode button[title*="modern view"],
+.historical-mode button[title*="historical view"] {
+  border-radius: 0 !important;
+  border: 1px solid rgba(42, 26, 10, 0.25) !important;
+  background-color: transparent !important;
+  font-family: 'Cinzel', serif !important;
+  letter-spacing: 0.15em !important;
+  color: var(--iron-gall, #2A1A0A) !important;
+  font-size: 9px !important;
 }
 
 /* ── BORDERS — aged document rules ── */
@@ -366,6 +500,20 @@ path.district-glow {
 
 }
 
+/* ── SCRIPTORIUM TARGETS — always visible in Modern mode ── */
+/* Prevents animejs inline opacity:0 from persisting after switching to Modern */
+:not(.historical-mode) .scriptorium-title,
+:not(.historical-mode) .scriptorium-subtitle,
+:not(.historical-mode) .scriptorium-header-line,
+:not(.historical-mode) .scriptorium-faction-col,
+:not(.historical-mode) .scriptorium-class-label,
+:not(.historical-mode) .scriptorium-family-cell,
+:not(.historical-mode) .scriptorium-year,
+:not(.historical-mode) .scriptorium-timeline {
+  opacity: 1 !important;
+  transform: none !important;
+}
+
 /* ── MODE TRANSITION FLASH — vellum light when lifting a page ── */
 @keyframes modeFlash {
   0%   { opacity: 0; }
@@ -376,5 +524,20 @@ path.district-glow {
 @media (prefers-reduced-motion: reduce) {
   @keyframes modeFlash {
     0%, 100% { opacity: 0; }
+  }
+
+  /* Scriptorium reveal — skip all entrance animations, show immediately */
+  .scriptorium-title,
+  .scriptorium-subtitle,
+  .scriptorium-header-line,
+  .scriptorium-faction-col,
+  .scriptorium-class-label,
+  .scriptorium-family-cell,
+  .scriptorium-year,
+  .scriptorium-timeline {
+    opacity: 1 !important;
+    transform: none !important;
+    animation: none !important;
+    transition: none !important;
   }
 }

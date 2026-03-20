@@ -486,9 +486,9 @@ const HistoricalMap: React.FC<HistoricalMapProps> = ({ data, year, onSelectFamil
                     style={{ opacity: vm.isExiled ? 0.6 : 1 }}
                   >
                      {isSelected && (
-                         <rect x={-width/2 - 1.2} y={-height/2 - 1.2} width={width + 2.4} height={height + 2.4} fill="none" stroke="#C17C59" strokeWidth={0.8} rx={1} className="opacity-80"/>
+                         <rect x={-width/2 - 1.2} y={-height/2 - 1.2} width={width + 2.4} height={height + 2.4} fill="none" stroke={isHistoricalMode ? "rgba(184,58,42,0.7)" : "#C17C59"} strokeWidth={0.8} rx={isHistoricalMode ? 0 : 1} className="opacity-80"/>
                     )}
-                    <rect x={-width/2} y={-height/2} width={width} height={height} fill="#F3EDE2" stroke={strokeColor} strokeWidth={strokeWidth} className="shadow-sm"/>
+                    <rect x={-width/2} y={-height/2} width={width} height={height} fill={isHistoricalMode ? "transparent" : "#F3EDE2"} stroke={isHistoricalMode ? "rgba(42,26,10,0.15)" : strokeColor} strokeWidth={isHistoricalMode ? 0.15 : strokeWidth}/>
                     {hasFactionStrip && stripColor && (
                          <rect x={-width/2} y={-height/2} width={stripWidth} height={height} fill={stripColor} stroke="none"/>
                     )}

@@ -91,10 +91,16 @@ export function useScriptoriumReveal({ isHistoricalMode, isReady }: UseScriptori
 
   }, [isHistoricalMode, isReady]);
 
-  // Reset when switching to Modern so re-entering Scriptorium replays
+  // Reset when switching to Modern: clear animejs inline styles so elements are visible
   useEffect(() => {
     if (!isHistoricalMode) {
       hasRevealed.current = false;
+      // Remove inline opacity/transform that animejs may have set, restoring CSS defaults
+      const elements = document.querySelectorAll<HTMLElement>(TARGETS);
+      elements.forEach(el => {
+        el.style.opacity = '';
+        el.style.transform = '';
+      });
     }
   }, [isHistoricalMode]);
 }
